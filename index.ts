@@ -3,9 +3,10 @@ import errorHandler from 'errorhandler';
 import config from './config'
 import router from './routes';
 import { hello } from './controller';
+require('dotenv').config();
 
-const PORT: number = parseInt(<string>process.env.PORT, 10) || config.PORT;
-const HOSTNAME = "food-game.herokuapp.com";
+const PORT: number = process.env.DEPLOY === "local" ? config.PORT : parseInt(<string>process.env.PORT, 10);
+const HOSTNAME = process.env.DEPLOY === "local" ? config.HOSTNAME : "food-game.herokuapp.com";
 
 const app = express();
 app.use(errorHandler());

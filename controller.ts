@@ -16,7 +16,7 @@ import {getHello} from './core';
 
 export const hello = (req: Request, res: Response) => {
   // If in the URL (GET request) e.g. localhost:8080/?name=pippo
-  const name = req.params['name'];
+  const name = req.query['name'];
 
   // If in body of the request (as json or form-data)
   // const name = req.body['name'];
