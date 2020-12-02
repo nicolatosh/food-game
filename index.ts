@@ -13,5 +13,5 @@ app.use(errorHandler());
 
 app.get('/hello',hello);
 
-app.listen(PORT,HOSTNAME);
+app.listen(process.env.PORT);
 console.log(`Listening at ${config.HOSTNAME}:${config.PORT}`);
