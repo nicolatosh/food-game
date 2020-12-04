@@ -14,8 +14,8 @@ const axios = require('axios').default;
 
 //#region --- EXAMPLE ---
 
-export const getHello: (name: string) => { text: string } = (name) => {
+export const getWelcome: (name: string) => { text: string } = (name) => {
   return {
-    text: `Hello ${name}`,
+    text: `Hello ${name} CIAO`,
   };
 };

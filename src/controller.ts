@@ -10,11 +10,9 @@
  */
 
 import { Request, Response } from 'express';
-import {getHello} from './core';
+import { getWelcome } from './core';
 
-//#region --- EXAMPLE ---
-
-export const hello = (req: Request, res: Response) => {
+export const welcome = (req: Request, res: Response) => {
   // If in the URL (GET request) e.g. localhost:8080/?name=pippo
   const name = req.query['name'];
 
@@ -25,7 +23,7 @@ export const hello = (req: Request, res: Response) => {
   // const name = req.params['name'];
 
   if (name != null && typeof name === 'string') {
-    res.send(getHello(name));
+    res.send(getWelcome(name));
   } else {
     res.status(400);
     res.send({ error: 'Invalid name format!' });

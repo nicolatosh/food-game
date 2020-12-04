@@ -11,8 +11,8 @@
 
 import express from 'express';
 import {
-  hello,
-} from './controller';
+    welcome
+} from './controller'
 
 const router = express.Router();
 
@@ -21,6 +21,6 @@ const router = express.Router();
 // To add URL parameters (Doable for any method! Not only for GET):
 // router.get('/:parameter1/:parameter2', f);
 
-router.get('/', hello); // Example
+router.get('/', welcome); // Example
 
 export default router;

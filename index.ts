@@ -1,8 +1,8 @@
 import express from 'express';
 import errorHandler from 'errorhandler';
 import config from './config'
-import router from './routes';
-import { hello } from './controller';
+import router from './src/routes';
+import bodyParser from 'body-parser';
 require('dotenv').config();
 
 const PORT: number = process.env.DEPLOY === "local" ? config.PORT : parseInt(<string>process.env.PORT, 10);
@@ -11,7 +11,9 @@ const HOSTNAME = process.env.DEPLOY === "local" ? config.HOSTNAME : "food-game.h
 const app = express();
 app.use(errorHandler());
 
-app.get('/hello',hello);
+// Uses router for all routes (we split the server logics and the routes definition)
+app.use('/', router);
+app.use(bodyParser.json());
 
-app.listen(process.env.PORT);
-console.log(`Listening at ${config.HOSTNAME}:${config.PORT}`);
+app.listen(PORT, HOSTNAME);
+console.log(`Listening at ${HOSTNAME}:${PORT}`);
