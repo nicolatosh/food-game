@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+
+  recipes_db:
+    image: mongo
+    ports:
+      - 27017:27017
+  recipes_db_adapter:
+    build:
+      context: ./recipes_db_adapter
+    ports:
+      - 5000:5000
+    links:
+      - "recipes_db"
+
