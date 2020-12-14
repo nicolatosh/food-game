@@ -4,6 +4,7 @@ import jsonschema
 from flask import Flask, request, make_response
 from jsonschema import validate
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
 app = Flask(__name__)
 
@@ -45,9 +46,24 @@ def validate_json(json_data):
     return True
 
 
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
+@app.route('/info')
+def info():
+    connection = "Adapter and Mongo are Online!"
+    try:
+        client.admin.command('ismaster')
+        info = client.server_info()
+    except ConnectionFailure:
+        connection = "Error: Adapter working but Mongo is offline"
+        info = "Mongo offline"
+        print(connection)
+    info_json = {"Connection": connection, "Mongo status": info}
+    response = make_response(json.dumps(info_json))
+    response.headers['Content-Type'] = 'application/json'
+    if info == "Mongo offline":
+        response.status_code = 503
+    else:
+        response.status_code = 200
+    return response
 
 
 # Post Json with recipe data

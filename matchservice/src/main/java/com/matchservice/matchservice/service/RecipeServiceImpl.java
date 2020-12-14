@@ -1,5 +1,6 @@
 package com.matchservice.matchservice.service;
 
+import com.matchservice.matchservice.model.Ingredient;
 import com.matchservice.matchservice.model.Recipe;
 import com.matchservice.matchservice.repository.RecipeRepoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,12 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Recipe> getAllRecipes() {
-        return recipeRepo.getAllrecipes();
+    public List<Recipe> getRecipes() {
+        return recipeRepo.getRecipes();
+    }
+
+    @Override
+    public List<Ingredient> getIngredients() {
+        return recipeRepo.getIngredients();
     }
 }

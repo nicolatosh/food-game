@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface RecipeRepo {
 
-    List<Recipe> getAllrecipes();
+    List<Recipe> getRecipes();
 
     List<Ingredient> getIngredients();
 
