@@ -1,9 +1,9 @@
 import json
+
 import jsonschema
-from flask import Flask, redirect, url_for, request, Response, make_response
-from pymongo import MongoClient
-from pymongo.errors import OperationFailure
+from flask import Flask, request, make_response
 from jsonschema import validate
+from pymongo import MongoClient
 
 app = Flask(__name__)
 
@@ -18,13 +18,13 @@ recipeSchema = {
     "description": "Simple recipe to cook",
     "properties": {
         "name": {"type": "string"},
-        "ingredients": { 
+        "ingredients": {
             "type": "array",
             "items": {
                 "type": "string"
             }
         },
-        "steps":{ 
+        "steps": {
             "type": "array",
             "items": {
                 "type": "string"
@@ -51,9 +51,9 @@ def hello_world():
 
 
 # Post Json with recipe data
-@app.route('/add-recipe', methods=['POST'])
+@app.route('/addrecipe', methods=['POST'])
 def add_recipe():
-    print("Post recieved")
+    print("Post received")
     req_data = request.get_json()
     if validate_json(req_data):
         result = collection.insert_one(req_data)
@@ -62,18 +62,44 @@ def add_recipe():
     else:
         return "400"
 
+
 # Endpoint to get all recipes at '/recipes' Get method
 @app.route('/recipes', methods=['GET'])
 def get_recipes():
     res = collection.count_documents({})
     if res:
-        coll = list(collection.find({},{ "_id": 0 }))
+        # returning recipes without "_id" generated from mongo
+        coll = list(collection.find({}, {"_id": 0}))
         for x in coll:
             print(x)
         response = make_response(json.dumps(coll, default=str))
         response.headers['Content-Type'] = 'application/json'
         return response
     return "404"
+
+
+# Utility function to compute union without repetition
+def union(lst1, lst2):
+    final_list = list(set(lst1) | set(lst2))
+    return final_list
+
+
+# Endpoint to get all ingredients at '/ingredients' Get method
+@app.route('/ingredients', methods=['GET'])
+def get_ingredients():
+    res = collection.count_documents({})
+    if res:
+        # returning ingredients from recipes
+        coll = list(collection.find({}, {"_id": 0, "ingredients": 1}))
+        res = []
+        for x in coll:
+            res = union(res, x['ingredients'])
+        print(res)
+        response = make_response(json.dumps(res))
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    return "404"
+
 
 if __name__ == "__main__":
     app.run(port=5000)
