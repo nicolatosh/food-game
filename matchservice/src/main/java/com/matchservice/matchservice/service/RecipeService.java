@@ -8,5 +8,5 @@ public interface RecipeService {
 
     List<Recipe> getRecipes();
 
-    List<Ingredient> getIngredients();
+    List<String> getIngredients();
 }

@@ -1,7 +1,6 @@
 package com.matchservice.matchservice.controller;
 
 import com.google.gson.Gson;
-import com.matchservice.matchservice.model.Ingredient;
 import com.matchservice.matchservice.repository.*;
 import com.matchservice.matchservice.config.GameModalities;
 import com.matchservice.matchservice.model.Recipe;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.json.JSONObject;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class MatchserviceApi {
@@ -23,9 +23,6 @@ public class MatchserviceApi {
     private static GameModalities modalities;
     @Autowired
     private RecipeServiceImpl recipeService;
-
-//    @GetMapping(value = "/match", path = "{type}", produces = "application/json")
-//    public ResponseEntity<?> getMatch(@PathVariable("type") GameModalities type) {}
 
     /****
      * This endpoint produces a new {@link Match} according to some parameters.
@@ -38,14 +35,14 @@ public class MatchserviceApi {
         JSONObject response;
 
         List<Recipe> recipes = recipeService.getRecipes();
-        List<Ingredient> ingredients = recipeService.getIngredients();
         Random rand = new Random();
         var selectedRecipe = recipes.get(rand.nextInt(recipes.size()));
         var scrambledSteps = Utils.scramble(selectedRecipe.getSteps());
 
         //TODO scramble ingredients = recipe ingredients - few of them replaced with someother ones different than actual ones
-        var ingredientsPool = selectedRecipe.getIngredients();
-        var scrambledIngredients = Utils.scramble(selectedRecipe.getIngredients());
+        var ingredientsPool = recipeService.getIngredients();
+        var recipeIngredients = selectedRecipe.getIngredients();
+        var scrambledIngredients = Utils.scrambleDoubleSource(recipeIngredients, ingredientsPool);
         System.out.println("Building new match of type: " + type);
         switch (type) {
             case "rearrange_steps":
@@ -64,10 +61,25 @@ public class MatchserviceApi {
                         .body(body);
 
             case "select_ingredients":
-                List<String> answer_ingredients = selectedRecipe.getIngredients();
 
-                break;
+                List<String> answerIngredients = scrambledIngredients.stream().filter(recipeIngredients::contains)
+                        .collect(Collectors.toList());
+                MatchImpl matchIngr = new MatchImpl(
+                        null,
+                        GameModalities.select_ingredients.toString(),
+                        selectedRecipe.getTitle(),
+                        scrambledIngredients,
+                        Collections.emptyList(),
+                        answerIngredients);
+                Gson gsonIngr = new Gson();
+                body = gsonIngr.toJson(matchIngr);
+                return ResponseEntity
+                        .ok()
+                        .body(body);
             default:
+                return ResponseEntity
+                        .badRequest()
+                        .body("Error, such type of match does not exits");
 
         }
 
@@ -83,8 +95,5 @@ public class MatchserviceApi {
 //                .ok()
 //                .body(response.toString());
 //    }
-        return ResponseEntity
-                .badRequest()
-                .body("ERROR");
     }
 }

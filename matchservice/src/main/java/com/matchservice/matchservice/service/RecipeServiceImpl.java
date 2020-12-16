@@ -24,7 +24,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Ingredient> getIngredients() {
+    public List<String> getIngredients() {
         return recipeRepo.getIngredients();
     }
 }

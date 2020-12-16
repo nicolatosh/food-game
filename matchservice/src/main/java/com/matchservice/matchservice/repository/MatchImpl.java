@@ -1,10 +1,6 @@
 package com.matchservice.matchservice.repository;
-
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 
 public class MatchImpl implements Match{
@@ -28,6 +24,7 @@ public class MatchImpl implements Match{
     public String getId() {
         return id;
     }
+
     public String getMatch_type() {
         return match_type;
     }

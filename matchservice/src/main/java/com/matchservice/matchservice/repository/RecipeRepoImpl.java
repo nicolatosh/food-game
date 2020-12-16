@@ -4,12 +4,17 @@ import com.google.gson.Gson;
 import com.matchservice.matchservice.config.DataSourceRoutes;
 import com.matchservice.matchservice.model.Ingredient;
 import com.matchservice.matchservice.model.Recipe;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /****
  * This class can perform HTTP requests to the RecipesAdapter. It is a source of
@@ -52,19 +57,20 @@ public class RecipeRepoImpl implements RecipeRepo{
      * @return List of {@link Ingredient}
      */
     @Override
-    public List<Ingredient> getIngredients() {
+    public List<String> getIngredients() {
         System.out.print("Requested all ingredients: ");
 
-        String recipe = webClient.build()
+        String ingr = webClient.build()
                 .get()
                 .uri(DataSourceRoutes.INGREDIENTS_URL)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
 
-        System.out.println(recipe);
+        System.out.println(ingr);
         Gson g = new Gson();
-        Ingredient[] ingredients = g.fromJson(recipe,Ingredient[].class);
-        return Arrays.asList(ingredients.clone());
+        JSONArray test = new JSONArray(ingr);
+        var temp = test.toList();
+        return temp.stream().map(Object::toString).collect(Collectors.toList());
     }
 }
