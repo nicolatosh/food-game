@@ -8,7 +8,7 @@ from pymongo.errors import ConnectionFailure
 
 app = Flask(__name__)
 
-client = MongoClient('localhost', 27017)
+client = MongoClient('recipes_db', 27017)
 db = client.recipes_db
 collection = db.recipes
 
@@ -118,4 +118,4 @@ def get_ingredients():
 
 
 if __name__ == "__main__":
-    app.run(port=5000)
+    app.run(host='0.0.0.0',port=5000)

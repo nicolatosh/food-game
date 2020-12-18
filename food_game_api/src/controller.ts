@@ -10,7 +10,7 @@
  */
 
 import { Request, Response } from 'express';
-import { getWelcome } from './core';
+import { buildGame, getWelcome } from './core';
 
 export const welcome = (req: Request, res: Response) => {
   // If in the URL (GET request) e.g. localhost:8080/?name=pippo
@@ -24,6 +24,25 @@ export const welcome = (req: Request, res: Response) => {
 
   if (name != null && typeof name === 'string') {
     res.send(getWelcome(name));
+  } else {
+    res.status(400);
+    res.send({ error: 'Invalid name format!' });
+  }
+};
+
+/**
+ * 
+ * @param req 
+ * @param res 
+ */
+export const play = async (req: Request, res: Response) => {
+ 
+ const gamemode = req.query['gamemode'];
+ const matchtype = req.query['matchtype'];
+ 
+ //Checks on parameters
+  if (gamemode === "single" && matchtype === "rearrange_steps") {
+    res.send(await buildGame(gamemode,matchtype));
   } else {
     res.status(400);
     res.send({ error: 'Invalid name format!' });

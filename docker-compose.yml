@@ -12,5 +12,6 @@ services:
     ports:
       - 5000:5000
     links:
-      - "recipes_db"
+      - 'recipes_db'
+ 
 

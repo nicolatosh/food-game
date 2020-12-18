@@ -5,8 +5,10 @@ import router from './src/routes';
 import bodyParser from 'body-parser';
 require('dotenv').config();
 
-const PORT: number = process.env.DEPLOY === "local" ? config.PORT : parseInt(<string>process.env.PORT, 10);
-const HOSTNAME = process.env.DEPLOY === "local" ? config.HOSTNAME : "food-game.herokuapp.com";
+// const PORT: number = process.env.DEPLOY === "local" ? config.PORT : parseInt(<string>process.env.PORT, 10);
+// const HOSTNAME = process.env.DEPLOY === "local" ? config.HOSTNAME : "food-game.herokuapp.com";
+const PORT = 30000;
+const HOSTNAME = 'localhost';
 
 const app = express();
 app.use(errorHandler());

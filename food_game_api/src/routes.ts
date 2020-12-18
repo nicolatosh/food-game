@@ -11,7 +11,8 @@
 
 import express from 'express';
 import {
-    welcome
+    welcome,
+    play
 } from './controller'
 
 const router = express.Router();
@@ -22,5 +23,14 @@ const router = express.Router();
 // router.get('/:parameter1/:parameter2', f);
 
 router.get('/', welcome); // Example
+/**
+ * Endpoint to initialize the game. User should POST the chosen
+ * game mode {@see GAME_MODE} via "gamemode" param and also the
+ * match type {@see MATCH_TYPES} 
+ */
+router.post('/play', play)
+
+router.get('/game' );
+router.post('/game')
 
 export default router;
