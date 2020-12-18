@@ -23,19 +23,19 @@ export interface Match {
 }
 
 export interface GameMatch {
-  gameid: number;
+  gameid: string;
   gamemode: string;
   game_status: GAME_STATUS;
   matches: Match[];
 }
 
 export class GameMatchImpl implements GameMatch {
-   gameid: number;
+   gameid: string;
    gamemode: string;
    game_status: GAME_STATUS;
    matches: Array<Match>;
 
-  constructor(gameid: number, gamemode: string, game_status: GAME_STATUS, matches: Match){
+  constructor(gameid: string, gamemode: string, game_status: GAME_STATUS, matches: Match){
     this.gameid = gameid;
     this.gamemode = gamemode;
     this.game_status = game_status;

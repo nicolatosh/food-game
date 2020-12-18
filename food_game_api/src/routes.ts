@@ -12,7 +12,9 @@
 import express from 'express';
 import {
     welcome,
-    play
+    play,
+    getMatchstatus,
+    processUserInput
 } from './controller'
 
 const router = express.Router();
@@ -30,7 +32,7 @@ router.get('/', welcome); // Example
  */
 router.post('/play', play)
 
-router.get('/game' );
-router.post('/game')
+router.get('/game', getMatchstatus);
+router.post('/game', processUserInput)
 
 export default router;

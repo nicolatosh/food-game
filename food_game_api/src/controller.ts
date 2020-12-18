@@ -10,7 +10,8 @@
  */
 
 import { Request, Response } from 'express';
-import { buildGame, getWelcome } from './core';
+import { buildGame, getWelcome, processInput } from './game';
+import { checkGameActive } from './utils';
 
 export const welcome = (req: Request, res: Response) => {
   // If in the URL (GET request) e.g. localhost:8080/?name=pippo
@@ -46,6 +47,37 @@ export const play = async (req: Request, res: Response) => {
   } else {
     res.status(400);
     res.send({ error: 'Invalid name format!' });
+  }
+};
+
+/**@todo add user_id */
+export const getMatchstatus = async (req: Request, res: Response) => {
+
+  const gameid = req.params['gameid'];
+
+  let game = checkGameActive(gameid);
+  if(await game != false){
+    res.send(game);
+    res.status(200);
+  }else{
+    res.status(404);
+    res.send({ error: 'Game does not exits!' });
+  }
+};
+
+export const processUserInput = async (req: Request, res: Response) => {
+
+  const gameid = req.params['gameid'];
+  //JSON answer
+  const answer = req.body;
+
+  let game = checkGameActive(gameid);
+  if(await game != false){
+    res.send(await processInput(gameid,answer) );
+    res.status(200);
+  }else{
+    res.status(404);
+    res.send({ error: 'Game does not exits!' });
   }
 };
 

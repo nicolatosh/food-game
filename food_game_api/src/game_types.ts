@@ -14,3 +14,6 @@ export enum GAME_STATUS {
   Waiting_opponent = "waiting_opponent"
 }
 
+//Nummber of milliseconds. 5000 = 5 seconds
+export const MATCH_DURATION: Number = 5000;
+
