@@ -17,3 +17,5 @@ export enum GAME_STATUS {
 //Nummber of milliseconds. 5000 = 5 seconds
 export const MATCH_DURATION: Number = 5000;
 
+export const MAX_MATCHES: Number = 2;
+

@@ -32,7 +32,6 @@
 @REM set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000
 @REM MAVEN_SKIP_RC - flag to disable loading of mavenrc files
 @REM ----------------------------------------------------------------------------
-
 @REM Begin all REM lines with '@' in case MAVEN_BATCH_ECHO is 'on'
 @echo off
 @REM set title of command window
@@ -53,6 +52,7 @@ if exist "%HOME%\mavenrc_pre.cmd" call "%HOME%\mavenrc_pre.cmd"
 @setlocal
 
 set ERROR_CODE=0
+set JAVA_HOME=C:\Program Files\Java\jdk-11.0.9\bin
 
 @REM To isolate internal variables from possible post scripts, we use another setlocal
 @setlocal

@@ -29,6 +29,11 @@ export interface GameMatch {
   matches: Match[];
 }
 
+export interface MatchStats {
+  matchid: string;
+  winnerid: string;
+}
+
 export class GameMatchImpl implements GameMatch {
    gameid: string;
    gamemode: string;

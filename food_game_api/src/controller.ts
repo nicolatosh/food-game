@@ -32,6 +32,8 @@ export const welcome = (req: Request, res: Response) => {
 };
 
 /**
+ * This endpoint "/play" allows to start a game.
+ * "gamemode" and "matchtype" are requested params. e.g /play?gamemode=...
  * 
  * @param req 
  * @param res 
@@ -50,13 +52,18 @@ export const play = async (req: Request, res: Response) => {
   }
 };
 
-/**@todo add user_id */
+/**
+ * Returns the game given a "gameid" or returns a 404 error message.
+ * 
+ * @param req 
+ * @param res 
+ */
 export const getMatchstatus = async (req: Request, res: Response) => {
 
-  const gameid = req.params['gameid'];
+  const gameid = String(req.query['gameid']);
 
-  let game = checkGameActive(gameid);
-  if(await game != false){
+  let game = await checkGameActive(gameid);
+  if( game != false){
     res.send(game);
     res.status(200);
   }else{
@@ -65,9 +72,14 @@ export const getMatchstatus = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * 
+ * @param req 
+ * @param res 
+ */
 export const processUserInput = async (req: Request, res: Response) => {
 
-  const gameid = req.params['gameid'];
+  const gameid = String(req.query['gameid']);
   //JSON answer
   const answer = req.body;
 
