@@ -11,6 +11,7 @@
 
 import { Request, Response } from 'express';
 import { buildGame, getWelcome, processInput } from './game';
+import { GAME_MODE, MATCH_TYPES } from './game_types';
 import { checkGameActive } from './utils';
 
 export const welcome = (req: Request, res: Response) => {
@@ -44,11 +45,12 @@ export const play = async (req: Request, res: Response) => {
  const matchtype = req.query['matchtype'];
  
  //Checks on parameters
-  if (gamemode === "single" && matchtype === "rearrange_steps") {
+  if ((gamemode === GAME_MODE.Single || gamemode === GAME_MODE.Multiplayer) 
+      && (matchtype === MATCH_TYPES.Rearrange_steps || matchtype === MATCH_TYPES.Select_ingredients)) {
     res.send(await buildGame(gamemode,matchtype));
   } else {
     res.status(400);
-    res.send({ error: 'Invalid name format!' });
+    res.send({ error: 'Cannot start game with chosen settings' });
   }
 };
 

@@ -12,6 +12,7 @@ client = MongoClient('recipes_db', 27017)
 db = client.recipes_db
 collection = db.recipes
 
+#TODO fix recipes duplicates
 # This is how a recipe looks like. It is used for validation
 recipeSchema = {
     "title": "Recipe",
