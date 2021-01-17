@@ -64,8 +64,9 @@ export const opponentJoinGame: (gameid: string, userid: string) => Promise<true|
   //TODO check user id in Db
   if(actual_game && actual_game.game_status === GAME_STATUS.Waiting_opponent_connection){
     games[games.indexOf(actual_game)].game_status = GAME_STATUS.Started;
-    
+    return true
   }
+  return false
 };
 
 /*TODO consider "select_ingredients" types of matches

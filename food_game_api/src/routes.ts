@@ -17,6 +17,8 @@ import {
     processUserInput,
     opponentJoin
 } from './controller'
+import { login, signin } from './user_controller';
+
 
 const router = express.Router();
 
@@ -33,8 +35,10 @@ router.get('/', welcome); // Example
  */
 router.post('/play', play)
 
-router.get('/game', getMatchstatus);
+router.get('/game', getMatchstatus)
 router.post('/game', processUserInput)
 router.post('/game/join', opponentJoin)
+router.post('/register',signin)
+router.post('/login',login)
 
 export default router;
