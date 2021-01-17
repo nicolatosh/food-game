@@ -14,7 +14,8 @@ import {
     welcome,
     play,
     getMatchstatus,
-    processUserInput
+    processUserInput,
+    opponentJoin
 } from './controller'
 
 const router = express.Router();
@@ -34,5 +35,6 @@ router.post('/play', play)
 
 router.get('/game', getMatchstatus);
 router.post('/game', processUserInput)
+router.post('/game/join', opponentJoin)
 
 export default router;

@@ -10,7 +10,7 @@
  */
 
 import { Request, Response } from 'express';
-import { buildGame, getWelcome, processInput } from './game';
+import { buildGame, getWelcome, processInput, opponentJoinGame } from './game';
 import { GAME_MODE, MATCH_TYPES } from './game_types';
 import { checkGameActive } from './utils';
 
@@ -75,19 +75,43 @@ export const getMatchstatus = async (req: Request, res: Response) => {
 };
 
 /**
- * 
+ * Allows the server to interpret user input e.g answers for matches and 
+ * update the game status according to user behavior.
  * @param req 
  * @param res 
  */
 export const processUserInput = async (req: Request, res: Response) => {
 
-  const gameid = String(req.query['gameid']);
-  //JSON answer
-  const answer = req.body;
+  const response_body = req.body;
+  const gameid = response_body['gameid'];
+  const answer = response_body['answer'];
+  const userid = response_body['userid'];
+  let game = checkGameActive(gameid);
+
+  if(await game != false){
+    res.send(await processInput(gameid,answer,userid));
+    res.status(200);
+  }else{
+    res.status(404);
+    res.send({ error: 'Game does not exits!' });
+  }
+};
+
+/**
+ * Allows a user to join a game. User must provide a 'gameid' and 'userid'
+ * @param req 
+ * @param res 
+ */
+export const opponentJoin = async (req: Request, res: Response) => {
+
+  const response_body = req.body;
+  const gameid = response_body['gameid'];
+  const userid = response_body['userid'];
 
   let game = checkGameActive(gameid);
+
   if(await game != false){
-    res.send(await processInput(gameid,answer) );
+    res.send(await opponentJoinGame(gameid,userid));
     res.status(200);
   }else{
     res.status(404);

@@ -11,9 +11,11 @@ export enum MATCH_TYPES {
 
 export enum GAME_STATUS {
   Started = "started",
-  Waiting_opponent = "waiting_opponent",
+  Waiting_opponent_connection = "waiting_opponent_connection",
   Game_end = "game_end",
   Opponent_match_win = "opponet_match_win",
+  Opponent_wrong_response = "opponent_wrong_response",
+  Both_user_failure = "both_user_failure"
 }
 
 //Nummber of milliseconds. 5000 = 5 seconds

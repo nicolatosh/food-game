@@ -1,5 +1,5 @@
 
-import { Error, GameMatch, GameMatchImpl, Match, MatchStats } from "./types";
+import { Error, GameMatch, GameMatchImpl, Match, MatchStats, MatchStatsTemporany } from "./types";
 import config from "../config"
 import { json } from "body-parser";
 import { GAME_MODE, GAME_STATUS, MAX_MATCHES } from "./game_types";
@@ -8,10 +8,12 @@ import e from "express";
 
 const axios = require('axios').default;
 
-//Contains
+//Server resources, should be accessed only via REST methods
 export var games: GameMatch[] = Array(); 
 var gamesTimers: Map<String, NodeJS.Timeout> = new Map<String, NodeJS.Timeout>();
+var opponentConnectionTimers: Map<String, NodeJS.Timeout> = new Map<String, NodeJS.Timeout>();
 var localGamesStats: Map<String, MatchStats> = new Map<String, MatchStats>();
+var temporanyMatchStats: Map<String, MatchStatsTemporany> = new Map<String, MatchStatsTemporany>();
 
 
 
@@ -40,14 +42,31 @@ export const buildGame: (gamemode: string, matchtype: string) => Promise<GameMat
           startMatchTimer(gameId);
           break;
         case GAME_MODE.Multiplayer:
-          games.push(new GameMatchImpl(gameId,gamemode,GAME_STATUS.Waiting_opponent,match));
-          startMatchTimer(gameId);
+          //we set the game in waiting other player mode
+          //the opponent has a limited time to join the game
+          games.push(new GameMatchImpl(gameId,gamemode,GAME_STATUS.Waiting_opponent_connection,match));
+          startOpponentConnectionTimer(gameId);
           break;
       }
     }
     return games[games.length-1];
 };
 
+/**
+ * Function to allow another user to play a multyplayer game.
+ * @param gameid 
+ * @param userid 
+ */
+export const opponentJoinGame: (gameid: string, userid: string) => Promise<true|false> = async (gameid,userid) => {
+  const game = games.filter(e => e.gameid === gameid);
+  var actual_game = game[0];
+
+  //TODO check user id in Db
+  if(actual_game && actual_game.game_status === GAME_STATUS.Waiting_opponent_connection){
+    games[games.indexOf(actual_game)].game_status = GAME_STATUS.Started;
+    
+  }
+};
 
 /*TODO consider "select_ingredients" types of matches
 /**
@@ -56,7 +75,7 @@ export const buildGame: (gamemode: string, matchtype: string) => Promise<GameMat
  * @param gameid 
  * @param answer 
  */
-export const processInput: (gameid: string, answer: string[]) => Promise<GameMatch | any> = async (gameid,answer) => {
+export const processInput: (gameid: string, answer: string[], userid: string) => Promise<GameMatch | any> = async (gameid,answer,userid) => {
   
   const game = games.filter(e => e.gameid === gameid);
   var actual_game = game[0];
@@ -73,12 +92,13 @@ export const processInput: (gameid: string, answer: string[]) => Promise<GameMat
           //checking user answer 
           if(checkAnswer(actual_game,answer)){
 
-            stopMatchTimer(gameid);
             //at this point user has sent correct answer need to check
             //game current status and perform the right action
+            //also need to stop match timer
+            stopMatchTimer(gameid);
             console.log("User won the match: ", actual_game.matches[actual_game.matches.length-1]);
             //saving some stats
-            localGamesStats.set(gameid, { "matchid": actual_game.matches[actual_game.matches.length-1].id, "winnerid": "1"});
+            localGamesStats.set(gameid, { "matchid": actual_game.matches[actual_game.matches.length-1].id, "winnerid": userid});
             switch (actual_game.game_status){
               case GAME_STATUS.Started:
 
@@ -100,21 +120,70 @@ export const processInput: (gameid: string, answer: string[]) => Promise<GameMat
                     return e.toString();
                   }   
                 }else{
-                  //at this point user finished the game
+                  //at this point user finished all matches in the game
                   games[games.indexOf(actual_game)].game_status = GAME_STATUS.Game_end;
                   console.log("Game finished!");
                   gameEnd(gameid);
                   return "Game finished!";
                 }
-              
+
               case GAME_STATUS.Game_end:
                 return "Game finished! No more response allowed";
             }
-          }else{
-            return "Wrong answer"
-          }
-          
+          }else{return "Wrong answer"}
+        break;
+
         case GAME_MODE.Multiplayer:
+        
+          if(checkAnswer(actual_game,answer)){
+            stopMatchTimer(gameid);
+            //at this point user has sent correct answer need to check
+            //game current status and perform the right action
+            console.log("User won the match: ", actual_game.matches[actual_game.matches.length-1]);
+            //saving some stats
+            localGamesStats.set(gameid, { "matchid": actual_game.matches[actual_game.matches.length-1].id, "winnerid": userid});
+
+            switch (actual_game.game_status){
+              case GAME_STATUS.Started:
+                /**set match won, save stats, SYNC game => send post to both users */
+                break;
+              
+              case GAME_STATUS.Opponent_wrong_response:
+                //assuring that user who sent a bad response do not send the right one now
+                if(temporanyMatchStats.get(gameid)?.bad_response_userid === userid){
+                  return "You cannot send another response";
+                }else{
+                  /**set match won, save stats, SYNC game => send post to both users */
+                }
+
+                break;
+            }
+
+          //manage WRONG answers
+          }else{
+            switch (actual_game.game_status){
+
+              //user send bad response
+              case GAME_STATUS.Started:
+                //bad response. Game is now set to allow only answers from the other opponent
+                temporanyMatchStats.set(gameid, {"matchid": actual_game.matches[actual_game.matches.length-1].id, "bad_response_userid": userid });
+                games[games.indexOf(actual_game)].game_status = GAME_STATUS.Opponent_wrong_response;
+                console.log("Wrong answer from user:", userid);
+                return "Wrong answer";
+
+              //this case means that both users have sent a bad answer
+              //game can go to next match.
+              case GAME_STATUS.Opponent_wrong_response:
+
+                //user who already sent a bad answer cannot send nothing more
+                if(temporanyMatchStats.get(gameid)?.bad_response_userid === userid){
+                  return "You cannot send another response";
+                }else{
+                  games[games.indexOf(actual_game)].game_status = GAME_STATUS.Both_user_failure;
+                  return "Wrong answer";
+                }
+            }
+          }
 
         break;
       }
@@ -170,7 +239,20 @@ function checkAnswer(game: GameMatch, answer: string[]): boolean {
   return game.matches[game.matches.length-1].answer.toString() === answer.toString()
 }
 
+function startOpponentConnectionTimer(gameid: string): void{
+  
+  const timerid: ReturnType<typeof setTimeout> = setTimeout(() => {
+    opponentConnectionTimeout(gameid)
+  }, 10000);
 
+  opponentConnectionTimers.set(gameid,timerid);
+}
+
+function opponentConnectionTimeout(gameid: string): void{
+  const opponentTimer = opponentConnectionTimers.get(gameid);
+  if(opponentTimer != null){clearTimeout(opponentTimer); opponentConnectionTimers.delete(gameid);}
+  console.log(`Multyplayer game: ${gameid} failed to start. Opponent missing`);
+}
 
 
 
