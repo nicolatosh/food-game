@@ -59,43 +59,41 @@ def info():
 # Endpoint that allows user to signing or to login
 @app.route('/user', methods=['POST', 'GET'])
 def add_recipe():
-    req_data = request.get_json()
-    response = make_response({"nickname": req_data['nickname']})
-    response.headers['Content-Type'] = 'application/json'
 
-    if request.method == 'POST' and validate_json(req_data, userSchema):
-        print("User register request received")
-        if not is_user_duplicate(req_data['nickname']):
-            result = collection.insert_one(req_data)
-            print("Inserted in db: ", result)
-            if result:
-                response.status_code = 200
-                return response
-        response = make_response({"error": "Duplicate username"})
+    if request.method == 'POST':
+        req_data = request.get_json()
+        response = make_response({"nickname": req_data['nickname']})
+        response.headers['Content-Type'] = 'application/json'
+        
+        if validate_json(req_data, userSchema):
+            print("User register request received")
+            if not is_user_duplicate(req_data["nickname"]):
+                result = collection.insert_one(req_data)
+                print("Inserted in db: ", result)
+                if result:
+                    response.status_code = 200
+                    return response
+            response = make_response({"error": "Duplicate username"})
+            response.headers['Content-Type'] = 'application/json'
+            response.status_code = 400
+            return response     
+        response = make_response({"error": "Invalid Json payload"})
+        response.headers['Content-Type'] = 'application/json'
         response.status_code = 400
         return response
 
-
-    if request.method == 'GET' and  request.args.get('nickname'):
+    elif request.method == 'GET' and  request.args.get('nickname') != " ":
+        nick = request.args.get('nickname')
+        response = make_response({"nickname": nick})
+        response.headers['Content-Type'] = 'application/json'
         print("User nickname check requestd")
-        result = list(collection.find({ "nickname": request.args.get('nickname')}))
+        result = list(collection.find({"nickname": nick}, {"_id": 0}))
         print(result)
         if len(result):
             response.status_code = 200
+            response = make_response(json.dumps(result, default=str))
             return response
-        response.status_code = 400
-        return response
-
-    elif request.method == 'GET' and validate_json(req_data, userSchema):
-        print("Login user request received")
-        result = list(collection.find(req_data))
-        print(result)
-        if len(result):
-            response.status_code = 200
-            return response
-        response.status_code = 400
-        return response
-    else:
+        response = make_response({"error": 'User with nickname {nick} do not exist'})
         response.status_code = 400
         return response
         

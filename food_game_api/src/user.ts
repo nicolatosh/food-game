@@ -22,12 +22,8 @@ export class User {
  */
 export const signinUser: (nickname: string, password: string) => Promise<boolean> = async (nickname, password) => {
 
-    //register user if username is available
-    if(!isUserDuplicate(nickname)){
-       let res = await insertUser(nickname,password)
-       return res
-    }
-    return false;
+  let res = await insertUser(nickname,password)
+  return res
 }
 
 /**
@@ -40,7 +36,8 @@ const isUserDuplicate: (nickname: string) => Promise<boolean> = async (nickname)
         let user = await axios.get(`${config.USER_SERVICE_URL}/user=${nickname}`);
         return user;
       } catch (error) {
-        return error;
+        console.log(error);
+        return error
       }
 }
 
@@ -51,12 +48,12 @@ const isUserDuplicate: (nickname: string) => Promise<boolean> = async (nickname)
  */
 const insertUser: (nickname:string, password: string) => Promise<boolean> = async (nickname,password) =>{
 
-    let user = { 'nickname': nickname, 'password': hashPassword(password) };
+    let user = { 'nickname': nickname, 'password': await hashPassword(password) };
     try {
         let response = await axios.post(`${config.USER_SERVICE_URL}/user`, user);
-        return response.data;
+        return response.data
       } catch (error) {
-        return error;
+        return error
       }
 }
 
@@ -68,10 +65,12 @@ const insertUser: (nickname:string, password: string) => Promise<boolean> = asyn
 export const loginUser: (nickname:string, password: string) => Promise<User> = async (nickname,password) =>{
 
     try {
-        let user: User = await axios.get(`${config.USER_SERVICE_URL}/user=${nickname}`);
+        let user = await axios.get(`${config.USER_SERVICE_URL}/user?nickname=${nickname}`);
         //comparing clear password with hashed one
-        let match: boolean = await checkUserPassword(password,user.password);
-        if(match){return user}
+        let userdata = user.data[0]
+        let match: boolean = await checkUserPassword(password,userdata['password']);
+        console.log("Login succeed:" , match)
+        return { "nickname" : userdata['nickname']}
       } catch (error) {
         return error;
       }

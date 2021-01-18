@@ -4,10 +4,12 @@ const bcrypt = require('bcrypt');
  * Simple async hashing function
  * @param password string clear text
  */
-export const hashPassword: (password: string) => Promise<any> = async (password) => {
-    bcrypt.hash(password, 10).then(function(hash:string) {
+export const hashPassword: (password: string) => Promise<string> = async (password) => {
+    
+    let psw: string = await bcrypt.hash(password, 10).then(function(hash:string) {
         return hash;
     });
+    return psw;
 }
 
 /**
@@ -17,6 +19,12 @@ export const hashPassword: (password: string) => Promise<any> = async (password)
  */
 export const checkUserPassword: (password: string, hashedPassword:string) => Promise<boolean> = async(password,hashedPassword) => {
 
-    const match = await bcrypt.compare(password, hashedPassword);
-    return match;
+    let match:boolean = bcrypt.compare(password, hashedPassword).then(function(result:any) {
+        if(result){
+            return true
+        }else{
+           return false
+        }
+    });
+    return await match
 }
