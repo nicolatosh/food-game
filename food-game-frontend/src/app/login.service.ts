@@ -21,6 +21,7 @@ export class LoginService {
   }
 
   register(nickname: string, password: string): Observable<IUser> {
+    console.log(nickname, password)
     return this.http.post<IUser>(environment.apiRegister, {"nickname": nickname, "password": password}, this.httpOptions);
   }
 }
