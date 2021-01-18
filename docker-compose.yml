@@ -13,7 +13,7 @@ services:
   user_db:
     image: mongo
     ports:
-      - "27017:27020"
+      - "27018:27017"
     networks:
       app_net:
         ipv4_address: 172.16.238.30
@@ -21,7 +21,7 @@ services:
 
   recipes_db_adapter:
     build:
-      context: ./recipes_db_adapter
+      context: ./recipes-db-adapter
     ports:
       - "5000:5000"
     networks:
@@ -30,7 +30,7 @@ services:
   
   user_db_adapter:
     build:
-      context: ./user_db_adapter
+      context: ./user-db-adapter
     ports:
       - "5001:5001"
     networks:

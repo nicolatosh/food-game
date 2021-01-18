@@ -5,12 +5,13 @@ from flask import Flask, request, make_response
 from jsonschema import validate
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
+from bson.json_util import dumps
 
 app = Flask(__name__)
 
-client = MongoClient('user_db', 27020)
+client = MongoClient('user_db', 27017)
 db = client.user_db
-collection = db.user_db
+collection = db.user
 
 # This is how user look like
 userSchema = {
@@ -21,7 +22,7 @@ userSchema = {
         "nickname": {"type": "string"},
         "password": {"type": "string"}
     },
-    "required": ["name", "password"]
+    "required": ["nickname", "password"]
 }
 
 
@@ -59,33 +60,52 @@ def info():
 @app.route('/user', methods=['POST', 'GET'])
 def add_recipe():
     req_data = request.get_json()
-    if request.method == 'POST' and (validate_json(req_data, userSchema) is not True):
+    response = make_response({"nickname": req_data['nickname']})
+    response.headers['Content-Type'] = 'application/json'
+
+    if request.method == 'POST' and validate_json(req_data, userSchema):
         print("User register request received")
-        if is_user_duplicate(req_data.nickname) is not True:
+        if not is_user_duplicate(req_data['nickname']):
             result = collection.insert_one(req_data)
             print("Inserted in db: ", result)
             if result:
-                response = make_response({"nickname": req_data.nickname})
-                response.headers['Content-Type'] = 'application/json'
+                response.status_code = 200
                 return response
-        return "400"
+        response = make_response({"error": "Duplicate username"})
+        response.status_code = 400
+        return response
 
-    if request.method == 'GET' and (validate_json(req_data, userSchema) is not True):
-        print("Login user request received")
-        result = collection.find(req_data)
+
+    if request.method == 'GET' and  request.args.get('nickname'):
+        print("User nickname check requestd")
+        result = list(collection.find({ "nickname": request.args.get('nickname')}))
         print(result)
-        if result:
-            response = make_response({"nickname": result.nickname})
-            response.headers['Content-Type'] = 'application/json'
+        if len(result):
+            response.status_code = 200
             return response
-    return "400"
+        response.status_code = 400
+        return response
+
+    elif request.method == 'GET' and validate_json(req_data, userSchema):
+        print("Login user request received")
+        result = list(collection.find(req_data))
+        print(result)
+        if len(result):
+            response.status_code = 200
+            return response
+        response.status_code = 400
+        return response
+    else:
+        response.status_code = 400
+        return response
+        
 
 
 # Function to check if a nickname already exist
 def is_user_duplicate(nick):
     query = {"nickname": nick}
-    res = collection.find(query)
-    if res:
+    res = list(collection.find(query))
+    if len(res):
         return True
     return False
 
