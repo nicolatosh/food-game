@@ -6,11 +6,15 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { LoginService } from './login.service';
 import { HttpClientModule, HttpParams, HttpHeaders } from '@angular/common/http';
+import { PlayComponent } from './play/play.component';
+import { AccessGuard } from './access.guard';
+import { PlayService } from './play.service';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
+    PlayComponent,
   ],
   imports: [
     BrowserModule,
@@ -18,7 +22,7 @@ import { HttpClientModule, HttpParams, HttpHeaders } from '@angular/common/http'
     FormsModule,
     HttpClientModule
   ],
-  providers: [ LoginService ],
+  providers: [ LoginService, PlayService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -6,7 +6,9 @@ export const environment = {
   production: false,
   apiBaseUrl: "http://localhost:30000",
   apiLogin: "http://localhost:30000/login",
-  apiRegister: "http://localhost:30000/register"
+  apiRegister: "http://localhost:30000/register",
+  apiMatchTypes: "http://localhost:30000/matchtypes",
+  apiPlay: "http://localhost:30000/play",
 };
 
 /*

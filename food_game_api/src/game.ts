@@ -2,7 +2,7 @@
 import { Error, GameMatch, GameMatchImpl, Match, MatchStats, MatchStatsTemporany } from "./types";
 import config from "../config"
 import { json } from "body-parser";
-import { GAME_MODE, GAME_STATUS, MAX_MATCHES } from "./game_types";
+import { GAME_MODE, GAME_STATUS, MATCH_DURATION, MATCH_TYPES, MAX_MATCHES } from "./game_types";
 import { getMatchFromService, getRandom } from "./utils";
 import e from "express";
 
@@ -68,6 +68,17 @@ export const opponentJoinGame: (gameid: string, userid: string) => Promise<true|
   }
   return false
 };
+
+/**
+ * Endpoint to get all match types supported by the game
+ */
+export const getMatchTypes: () => Promise<any> = async () =>{
+  let matches: Array<string> = []
+  for (let m in MATCH_TYPES){
+    matches.push(m.toLowerCase())
+  }
+  return matches
+}
 
 /*TODO consider "select_ingredients" types of matches
 /**
@@ -254,6 +265,8 @@ function opponentConnectionTimeout(gameid: string): void{
   if(opponentTimer != null){clearTimeout(opponentTimer); opponentConnectionTimers.delete(gameid);}
   console.log(`Multyplayer game: ${gameid} failed to start. Opponent missing`);
 }
+
+
 
 
 

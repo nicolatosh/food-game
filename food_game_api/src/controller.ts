@@ -10,7 +10,7 @@
  */
 
 import { Request, Response } from 'express';
-import { buildGame, getWelcome, processInput, opponentJoinGame } from './game';
+import { buildGame, getWelcome, processInput, opponentJoinGame, getMatchTypes } from './game';
 import { GAME_MODE, MATCH_TYPES } from './game_types';
 import { checkGameActive } from './utils';
 
@@ -40,17 +40,18 @@ export const welcome = (req: Request, res: Response) => {
  * @param res 
  */
 export const play = async (req: Request, res: Response) => {
- 
- const gamemode = req.query['gamemode'];
- const matchtype = req.query['matchtype'];
+
+  const response_body = req.body;
+  const gamemode = response_body['gamemode'];
+  const matchtype = response_body['matchtype'];
  
  //Checks on parameters
-  if ((gamemode === GAME_MODE.Single || gamemode === GAME_MODE.Multiplayer) 
-      && (matchtype === MATCH_TYPES.Rearrange_steps || matchtype === MATCH_TYPES.Select_ingredients)) {
+  if ((gamemode == GAME_MODE.Single || gamemode == GAME_MODE.Multiplayer) 
+      && (matchtype == MATCH_TYPES.Rearrange_steps || matchtype == MATCH_TYPES.Select_ingredients)) {
     res.send(await buildGame(gamemode,matchtype));
   } else {
     res.status(400);
-    res.send({ error: 'Cannot start game with chosen settings' });
+    res.send({ error: `Cannot start game with chosen settings: ${gamemode} ${matchtype}` });
   }
 };
 
@@ -118,4 +119,8 @@ export const opponentJoin = async (req: Request, res: Response) => {
     res.send({ error: 'Game does not exits!' });
   }
 };
+
+export const matchtypes = async (req: Request, res: Response) => {
+  res.send(await getMatchTypes());
+}
 

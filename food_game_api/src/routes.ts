@@ -15,7 +15,8 @@ import {
     play,
     getMatchstatus,
     processUserInput,
-    opponentJoin
+    opponentJoin,
+    matchtypes
 } from './controller'
 import { login, signin } from './user_controller';
 
@@ -34,11 +35,11 @@ router.get('/', welcome); // Example
  * match type {@see MATCH_TYPES} 
  */
 router.post('/play', play)
-
 router.get('/game', getMatchstatus)
 router.post('/game', processUserInput)
 router.post('/game/join', opponentJoin)
 router.post('/register',signin)
 router.post('/login',login)
+router.get('/matchtypes', matchtypes)
 
 export default router;

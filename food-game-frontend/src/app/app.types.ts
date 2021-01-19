@@ -12,3 +12,8 @@ export class User implements IUser{
         this.password = pass;
     }
 }
+
+export class Modalities {
+    public static SINGLE: string = "single";
+    public static MULTI: string = "multiplayer";
+}

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { IUser } from '../app.types';
+import { ActivatedRoute, Router } from '@angular/router';
+import { IUser, User } from '../app.types';
 import { LoginService } from '../login.service';
 
 @Component({
@@ -11,19 +12,30 @@ export class LoginComponent implements OnInit {
 
   nickname: string = "";
   password: string = "";
-  loginResponse: IUser = { nickname: "", password:"" }
-  registerResponse: IUser = { nickname: "", password:"" }
+  loginResponse: User = { nickname: "", password:"" }
+  registerResponse: User = { nickname: "", password:"" }
   badCredentials: boolean = false;
-  constructor(private service: LoginService) {}
+  returnUrl: string = '';
+  constructor(
+    private service: LoginService,
+    private router: Router,
+    private route: ActivatedRoute
+    ) {}
 
   ngOnInit(): void {
+      this.route.queryParams
+      .subscribe(params => this.returnUrl = params['return'] || '/play');
+      if(this.isLogged().nickname){
+        console.log("User already logged in!")
+        this.router.navigateByUrl('/play');
+      }
   }
 
   register() {
     if(this.checkCredentials()){
       this.badCredentials = false;
       this.service.register(this.nickname, this.password)
-      .subscribe((res:IUser) => {
+      .subscribe((res:User) => {
         this.registerResponse = res;
         return this.registerResponse;
       });
@@ -35,10 +47,20 @@ export class LoginComponent implements OnInit {
   login() {
     if(this.checkCredentials()){
       this.badCredentials = false;
-      this.service.login(this.nickname, this.password)
-      .subscribe((res:IUser) => {
-        this.registerResponse = res;
-      });
+      if(!this.isLogged()){
+        this.service.login(this.nickname, this.password)
+        .subscribe((res:User) => {
+          this.loginResponse = res;
+          let user = this.isLogged();
+          if(user.nickname){
+            console.log(`User ${user.nickname} logged, redirecting...`)
+            this.router.navigateByUrl(this.returnUrl);
+          }
+        });
+      }else{
+        console.log("User already logged in!")
+        this.router.navigateByUrl('/play');
+      }
     }else{
       this.badCredentials = true;
     }
@@ -49,6 +71,11 @@ export class LoginComponent implements OnInit {
       return false;
     }
     return true;
+  }
+  
+  isLogged():User {
+    let user: User = JSON.parse(localStorage.getItem('user') || '{}')
+    return user
   }
 
 }
