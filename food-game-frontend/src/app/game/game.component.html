@@ -1,0 +1,29 @@
+<div class="d-flex justify-content-center">
+    <div class="row justify-content-center" id="infobox">
+        <h4>Game mode <span class="badge bg-secondary">{{gamemode}}</span></h4>
+        <h4>Game id <span class="badge bg-secondary">{{gameid}}</span></h4>
+        <h4>Nickname <span class="badge bg-secondary">{{usernick}}</span></h4>
+        <div ng-switch="{{matchtype}}">
+            <h4 ng-switch-when="rearrange_steps" >Match type: <b>Order steps</b></h4>
+            <h4 ng-switch-when="scrambled_ingredients" >Match type: {{matchtype}}<b>Select correct ingredients</b></h4>
+        </div>
+    </div>
+</div>
+
+<div id="timerbox">
+    <h4>Remaining time {{timeleft}}</h4>
+    <div class="progress">
+        <div (timerEvent)="updateTime($event)" class="progress-bar bg-success" 
+            role="progressbar" [style.width.%]="[timeleft*10]" aria-valuenow="" aria-valuemin="{{timeleft}}" aria-valuemax="100"></div>
+      </div>
+</div>
+
+<div>
+    <div class="row flex-column justify-content-center" *ngFor="let elem of 
+        lastMatch[matchtype === 'select_ingredients' ? 'scrambled_ingredients' : 'scrambled_steps']">
+        <div class="row flex-column justify-content-center">
+            <button type="submit" class="btn btn-primary" type="button"
+            (click)="buildAnswer(elem)">{{elem}}</button>
+        </div>
+    </div>
+</div>

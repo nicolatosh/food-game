@@ -17,3 +17,19 @@ export class Modalities {
     public static SINGLE: string = "single";
     public static MULTI: string = "multiplayer";
 }
+
+export interface Match {
+    id: string;
+    match_type: string;
+    recipe_name: string;
+    scrambled_ingredients: Array<String>;
+    scrambled_steps: Array<String>;
+    answer: Array<String>;
+  }
+  
+  export interface GameMatch {
+    gameid: string;
+    gamemode: string;
+    game_status: string;
+    matches: Match[];
+  }

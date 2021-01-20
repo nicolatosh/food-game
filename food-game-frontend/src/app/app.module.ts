@@ -9,12 +9,14 @@ import { HttpClientModule, HttpParams, HttpHeaders } from '@angular/common/http'
 import { PlayComponent } from './play/play.component';
 import { AccessGuard } from './access.guard';
 import { PlayService } from './play.service';
+import { GameComponent } from './game/game.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     PlayComponent,
+    GameComponent,
   ],
   imports: [
     BrowserModule,
