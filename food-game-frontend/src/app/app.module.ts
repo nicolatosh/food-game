@@ -12,6 +12,7 @@ import { PlayService } from './play.service';
 import { GameComponent } from './game/game.component';
 import { CommonModule } from '@angular/common';
 import { GameService } from './game.service';
+import { GameendComponent } from './gameend/gameend.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { GameService } from './game.service';
     LoginComponent,
     PlayComponent,
     GameComponent,
+    GameendComponent,
   ],
   imports: [
     BrowserModule,

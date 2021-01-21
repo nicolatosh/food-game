@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { AccessGuard } from './access.guard';
 import { AppComponent } from './app.component';
 import { GameComponent } from './game/game.component';
+import { GameendComponent } from './gameend/gameend.component';
 import { LoginComponent } from './login/login.component';
 import { PlayComponent } from './play/play.component';
 
@@ -18,6 +19,9 @@ const routes: Routes = [
   },
   {
     path : 'game/:gamemode/:matchtype/:gameid/:usernick' , component: GameComponent
+  },
+  {
+    path : 'game/:result', component: GameendComponent
   }
 ];
 

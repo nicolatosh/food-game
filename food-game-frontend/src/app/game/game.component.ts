@@ -28,6 +28,7 @@ export class GameComponent implements OnInit {
       "answer": []
   }
   answerArray: Array<String> = [];
+  returnUrl: string = "";
 
   constructor(
     private router: Router,
@@ -96,6 +97,15 @@ export class GameComponent implements OnInit {
               case "Wrong answer":
                   this.gameOver = true
                   console.log("Wrong Answer");
+                  this.returnUrl = `/game/lose`
+                  this.router.navigateByUrl(this.returnUrl);
+                break;
+
+              case "Game finished!":
+                  this.gameOver = true
+                  console.log("Game win");
+                  this.returnUrl = `/game/win`
+                  this.router.navigateByUrl(this.returnUrl);
                 break;
             
               default:
