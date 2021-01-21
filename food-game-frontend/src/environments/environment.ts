@@ -9,6 +9,7 @@ export const environment = {
   apiRegister: "http://localhost:30000/register",
   apiMatchTypes: "http://localhost:30000/matchtypes",
   apiPlay: "http://localhost:30000/play",
+  apiGame: "http://localhost:30000/game"
 };
 
 /*

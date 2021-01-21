@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GameMatch, Match } from '../app.types';
+import { BehaviorSubject } from 'rxjs';
+import { Answer, GameMatch, Match } from '../app.types';
 import { GameService } from '../game.service';
 import { LoginService } from '../login.service';
 import { TimerService } from '../timer.service';
@@ -20,6 +21,13 @@ export class GameComponent implements OnInit {
   timerleftPercentage: number = 0;
   game: GameMatch;
   lastMatch!: Match;
+  gameOver: boolean;
+  answerToSend: Answer = {
+      "gameid": "",
+      "userid": "",
+      "answer": []
+  }
+  answerArray: Array<String> = [];
 
   constructor(
     private router: Router,
@@ -33,6 +41,7 @@ export class GameComponent implements OnInit {
       'game_status': "",
       'matches': []
     }
+    this.gameOver = false
   }
 
 
@@ -49,7 +58,11 @@ export class GameComponent implements OnInit {
 
       this.timer.startTimer().subscribe( timer => this.timeleft = timer )
       this.initMatch()
-      
+      this.answerToSend = {
+        "gameid": this.gameid,
+        "userid": this.usernick,
+        "answer": []
+      }
   }
 
   initMatch(){
@@ -62,9 +75,43 @@ export class GameComponent implements OnInit {
     }
   }
 
-  buildAnswer(match:any){
+  buildAnswer(response:String){
+    this.answerArray.push(response)
+    this.answerToSend.answer = this.answerArray
+    console
+    if(this.checkSendAnswer()){
+      //send answer to backend
+      this.gameService.sendAnswer(this.answerToSend)
+        .subscribe((game) => {
+          if(game.gameid){
+            this.game = game;
+            this.lastMatch = this.game['matches'][this.game["matches"].length-1];
+            this.answerToSend.answer = [];
+            this.answerArray = [];
+            this.initMatch()
+            this.timer.stopTimer()
+            this.timer.startTimer().subscribe( timer => this.timeleft = timer )
+          }else{
+            switch (String(game)) {
+              case "Wrong answer":
+                  this.gameOver = true
+                  console.log("Wrong Answer");
+                break;
+            
+              default:
+                break;
+            }
+          }
+        });
+    }
+  }
 
-    console.log("MATCH",match, "GAME", this.game)
+  checkSendAnswer(): boolean{
+    if(this.lastMatch.scrambled_ingredients.length > 0){
+      return this.answerArray.length === this.lastMatch.scrambled_ingredients.length
+    }else{ 
+      return this.answerArray.length === this.lastMatch.scrambled_steps.length
+    }
   }
 
 }

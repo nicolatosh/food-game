@@ -21,7 +21,7 @@ services:
 
   recipes_db_adapter:
     build:
-      context: ./recipes-db-adapter
+      context: ./recipes_db_adapter
     ports:
       - "5000:5000"
     networks:

@@ -10,6 +10,8 @@ import { PlayComponent } from './play/play.component';
 import { AccessGuard } from './access.guard';
 import { PlayService } from './play.service';
 import { GameComponent } from './game/game.component';
+import { CommonModule } from '@angular/common';
+import { GameService } from './game.service';
 
 @NgModule({
   declarations: [
@@ -24,7 +26,7 @@ import { GameComponent } from './game/game.component';
     FormsModule,
     HttpClientModule
   ],
-  providers: [ LoginService, PlayService],
+  providers: [ LoginService, PlayService, GameService ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -33,3 +33,13 @@ export interface Match {
     game_status: string;
     matches: Match[];
   }
+
+  export interface Answer {
+    gameid: string;
+    userid: string;
+    answer: Array<String>;
+  }
+
+  export interface GameError {
+      error: string;
+  }

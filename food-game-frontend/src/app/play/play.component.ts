@@ -28,7 +28,13 @@ export class PlayComponent implements OnInit {
 
   ngOnInit(): void {
     this.availableMatches = this.service.getMatchesType()
-      .subscribe(matches => this.availableMatches = matches);
+      .subscribe(matches => {
+        if(matches){
+          this.availableMatches = matches
+        }else{
+          console.log("Error in getting matches type")
+        }
+      });
   }
 
   single(){
