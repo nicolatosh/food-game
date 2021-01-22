@@ -61,6 +61,7 @@ export const opponentJoinGame: (gameid: string, userid: string) => Promise<true|
   const game = games.filter(e => e.gameid === gameid);
   var actual_game = game[0];
 
+  console.log("Opponent request receive")
   //TODO check user id in Db
   if(actual_game && actual_game.game_status === GAME_STATUS.Waiting_opponent_connection){
     games[games.indexOf(actual_game)].game_status = GAME_STATUS.Started;

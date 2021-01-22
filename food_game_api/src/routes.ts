@@ -37,7 +37,7 @@ router.get('/', welcome); // Example
 router.post('/play', play)
 router.get('/game', getMatchstatus)
 router.post('/game', processUserInput)
-router.post('/game/join', opponentJoin)
+router.get('/game/join', opponentJoin)
 router.post('/register',signin)
 router.post('/login',login)
 router.get('/matchtypes', matchtypes)

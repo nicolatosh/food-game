@@ -1,9 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
-import { Answer, GameMatch, Match } from '../app.types';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { Answer, GameMatch, Match, Modalities } from '../app.types';
 import { GameService } from '../game.service';
 import { LoginService } from '../login.service';
+import { ServersseService } from '../serversse.service';
 import { TimerService } from '../timer.service';
 
 @Component({
@@ -11,17 +13,17 @@ import { TimerService } from '../timer.service';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css']
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, OnDestroy {
 
   gameid: string = "";
   gamemode: string = "";
   usernick: string = "";
   matchtype: string = "";
   timeleft: number = 0;
+  timerSubscription: Subscription;
   timerleftPercentage: number = 0;
   game: GameMatch;
   lastMatch!: Match;
-  gameOver: boolean;
   answerToSend: Answer = {
       "gameid": "",
       "userid": "",
@@ -29,12 +31,14 @@ export class GameComponent implements OnInit {
   }
   answerArray: Array<String> = [];
   returnUrl: string = "";
+  disabledButtons: Array<number> = []
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private timer: TimerService,
-    private gameService: GameService
+    private gameService: GameService,
+    private sse: ServersseService
   ) {
     this.game = {
       'gameid' : "",
@@ -42,7 +46,11 @@ export class GameComponent implements OnInit {
       'game_status': "",
       'matches': []
     }
-    this.gameOver = false
+    this.timerSubscription = new Subscription
+  }
+
+  ngOnDestroy(): void {
+    this.timerSubscription.unsubscribe()
   }
 
 
@@ -57,7 +65,7 @@ export class GameComponent implements OnInit {
         this.matchtype = params['matchtype']
       });
 
-      this.timer.startTimer().subscribe( timer => this.timeleft = timer )
+      this.timerSubscription = this.startTimer()
       this.initMatch()
       this.answerToSend = {
         "gameid": this.gameid,
@@ -67,45 +75,61 @@ export class GameComponent implements OnInit {
   }
 
   initMatch(){
-    let res = this.gameService.getGame(this.gameid)
-    if(res){
-      this.game = res
-      this.lastMatch = this.game['matches'][this.game["matches"].length-1]
-    }else{
-      console.log("Game match faild to init. Game match:", res)
+    switch (this.gamemode) {
+      case Modalities.SINGLE:
+        let res = this.gameService.getGame(this.gameid)
+        if(res){
+          this.game = res
+          this.lastMatch = this.game['matches'][this.game["matches"].length-1]
+        }else{
+          console.log("Game match faild to init. Game match:", res)
+        }
+        break;
+    
+      case Modalities.MULTI:
+        this.sse.returnAsObservable(environment.apiJoin).subscribe((data:any) => {
+          if(data){
+            console.log(data)
+          }
+        })
+        break;
+      default:
+        break;
     }
+    
   }
 
-  buildAnswer(response:String){
+  buildAnswer(response:String, index:number){
     this.answerArray.push(response)
     this.answerToSend.answer = this.answerArray
-    console
-    if(this.checkSendAnswer()){
-      //send answer to backend
+    let element = document.getElementById(String(index)) as HTMLElement;
+    element.setAttribute('disabled', 'true');
+    this.disabledButtons.push(index)
+  }
+
+  sendAnswer(){
+    if(this.answerToSend.answer.length > 0){
       this.gameService.sendAnswer(this.answerToSend)
         .subscribe((game) => {
           if(game.gameid){
+            this.timer.stopTimer()
             this.game = game;
             this.lastMatch = this.game['matches'][this.game["matches"].length-1];
             this.answerToSend.answer = [];
             this.answerArray = [];
             this.initMatch()
-            this.timer.stopTimer()
-            this.timer.startTimer().subscribe( timer => this.timeleft = timer )
+            this.startTimer()
+            this.resetButtons()
           }else{
             switch (String(game)) {
               case "Wrong answer":
-                  this.gameOver = true
                   console.log("Wrong Answer");
-                  this.returnUrl = `/game/lose`
-                  this.router.navigateByUrl(this.returnUrl);
+                  this.gameEnd(true)
                 break;
 
               case "Game finished!":
-                  this.gameOver = true
                   console.log("Game win");
-                  this.returnUrl = `/game/win`
-                  this.router.navigateByUrl(this.returnUrl);
+                  this.gameEnd(false)
                 break;
             
               default:
@@ -113,15 +137,45 @@ export class GameComponent implements OnInit {
             }
           }
         });
+      
+    }else{
+      console.log("Empty answer. Cannot send it")
     }
   }
 
-  checkSendAnswer(): boolean{
-    if(this.lastMatch.scrambled_ingredients.length > 0){
-      return this.answerArray.length === this.lastMatch.scrambled_ingredients.length
-    }else{ 
-      return this.answerArray.length === this.lastMatch.scrambled_steps.length
+  startTimer(): Subscription{
+     return this.timer.startTimer().subscribe( timer =>{
+      if(timer){
+        this.timeleft = timer
+      }else{
+        //time is up, user lost the game
+        console.log("Time is up!");
+        this.gameEnd(true)
+      }
+    })
+  }
+  
+  gameEnd(lost:boolean){
+    this.timer.stopTimer()
+    this.timerSubscription.unsubscribe()
+    if(lost){
+      this.returnUrl = `/game/lose`
+      this.router.navigateByUrl(this.returnUrl);
+    }else{
+      this.returnUrl = `/game/win`
+      this.router.navigateByUrl(this.returnUrl);
     }
   }
 
+  getRandId(): string{
+    return String(Math.floor((Math.random() * 100) + 1))
+  }
+
+  resetButtons(){
+    this.disabledButtons.forEach(e => {
+      let element = document.getElementById(String(e)) as HTMLElement;
+      console.log("RESETTING", element)
+      element.removeAttribute('disabled');
+    })
+  }
 }

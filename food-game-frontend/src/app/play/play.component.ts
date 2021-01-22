@@ -69,6 +69,17 @@ export class PlayComponent implements OnInit {
         break;
       
       case Modalities.MULTI:
+        this.service.initGame(this.gamemode,this.matchtype)
+          .subscribe((game:GameMatch) => {
+            if(game){
+              let gameid = game["gameid"]
+              this.gameService.setGame(game)
+              this.returnUrl = `/game/${this.gamemode}/${this.matchtype}/${gameid}/${this.loginService.currentUserValue.nickname}`
+              this.router.navigateByUrl(this.returnUrl);
+            }else{
+              //error
+            }
+          });
 
         break;
       default:

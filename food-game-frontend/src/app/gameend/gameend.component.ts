@@ -21,6 +21,10 @@ export class GameendComponent implements OnInit {
       .subscribe(params => {
         this.isGameOver = params['result']
       });
+
+      setTimeout(() => {
+        this.router.navigateByUrl("/");
+    }, 5000);  
   }
 
 }
