@@ -6,6 +6,7 @@ import { GameComponent } from './game/game.component';
 import { GameendComponent } from './gameend/gameend.component';
 import { LoginComponent } from './login/login.component';
 import { PlayComponent } from './play/play.component';
+import { WaitOpponentComponent } from './wait-opponent/wait-opponent.component';
 
 const routes: Routes = [
   {
@@ -15,7 +16,10 @@ const routes: Routes = [
     path: 'login', component: LoginComponent
   },
   {
-    path: 'play', component: PlayComponent, canActivate: [AccessGuard]
+    path: 'play/:usernick', component: PlayComponent, canActivate: [AccessGuard]
+  },
+  {
+    path: 'game/wait', component: WaitOpponentComponent
   },
   {
     path : 'game/:gamemode/:matchtype/:gameid/:usernick' , component: GameComponent

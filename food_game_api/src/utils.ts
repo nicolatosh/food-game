@@ -31,6 +31,6 @@ export const getMatchFromService: (matchtype: string) => Promise<Match | false> 
     let matchdata: Match = match.data;
     return matchdata;
   } catch (error) {
-    return error;
+    return false
   }
 }

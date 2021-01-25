@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { GameMatch, Modalities } from '../app.types';
 import { GameService } from '../game.service';
 import { LoginService } from '../login.service';
@@ -17,6 +17,8 @@ export class PlayComponent implements OnInit {
   modeSelected: boolean;
   availableMatches: any = [];
   returnUrl: string = "";
+  gameid: string = "";
+  navigationExtras: NavigationExtras;
 
   constructor(
     private service: PlayService,
@@ -24,7 +26,16 @@ export class PlayComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private gameService: GameService
-  ) { this.modeSelected = false; }
+  ) { this.modeSelected = false; 
+      this.navigationExtras = {
+        state: {
+          gamemode: "",
+          matchtype: "",
+          gameid: "",
+          user: ""
+        }
+      }
+    }
 
   ngOnInit(): void {
     this.availableMatches = this.service.getMatchesType()
@@ -47,10 +58,30 @@ export class PlayComponent implements OnInit {
     this.gamemode = Modalities.MULTI;
   }
 
+  /**
+   * Method triggered from HTLM component page when button JOIN game is clicked.
+   * The gameId paramerter is binded to html input form
+   */
   join(){
-
+    this.service.joinGame(this.gameid)
+    .subscribe((game:GameMatch) => {
+      if(game){
+        console.log("GAME IN JOIN",game)
+        let gameid = game["gameid"]
+        this.gameService.setGame(game)
+        this.returnUrl = `/game/${this.gamemode}/${this.matchtype}/${gameid}/${this.loginService.currentUserValue.nickname}`
+        this.router.navigateByUrl(this.returnUrl);
+      }else{
+        //error
+      }
+    });
   }
 
+  /**
+   * This method is tiggered from the HTML component page in which there are
+   * buttons to choose a gamemode (Single or Multi)
+   * @param match 
+   */
   play(match:string){
     this.matchtype = match;
     switch (this.gamemode) {
@@ -74,8 +105,16 @@ export class PlayComponent implements OnInit {
             if(game){
               let gameid = game["gameid"]
               this.gameService.setGame(game)
-              this.returnUrl = `/game/${this.gamemode}/${this.matchtype}/${gameid}/${this.loginService.currentUserValue.nickname}`
-              this.router.navigateByUrl(this.returnUrl);
+              this.navigationExtras = {
+                state: {
+                  gamemode: this.gamemode,
+                  matchtype: this.matchtype,
+                  gameid: gameid,
+                  user: this.loginService.currentUserValue.nickname
+                }
+              }
+              this.returnUrl = `/game/wait`
+              this.router.navigate(['/game/wait'], this.navigationExtras);
             }else{
               //error
             }

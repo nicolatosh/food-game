@@ -87,9 +87,20 @@ export class GameComponent implements OnInit, OnDestroy {
         break;
     
       case Modalities.MULTI:
-        this.sse.returnAsObservable(environment.apiJoin).subscribe((data:any) => {
-          if(data){
-            console.log(data)
+        this.sse.returnAsObservable(environment.apiSse).subscribe((data:any) => {
+          switch (data) {
+            case 'join':
+              let res = this.gameService.getGame(this.gameid)
+              if(res){
+                this.game = res
+                this.lastMatch = this.game['matches'][this.game["matches"].length-1]
+              }else{
+                console.log("Game match faild to init. Game match:", res)
+              }
+              break;
+          
+            default:
+              break;
           }
         })
         break;

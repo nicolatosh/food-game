@@ -13,6 +13,7 @@ import { GameComponent } from './game/game.component';
 import { CommonModule } from '@angular/common';
 import { GameService } from './game.service';
 import { GameendComponent } from './gameend/gameend.component';
+import { WaitOpponentComponent } from './wait-opponent/wait-opponent.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { GameendComponent } from './gameend/gameend.component';
     PlayComponent,
     GameComponent,
     GameendComponent,
+    WaitOpponentComponent,
   ],
   imports: [
     BrowserModule,

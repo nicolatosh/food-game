@@ -1,6 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, Observable, Observer } from 'rxjs';
-import { environment } from 'src/environments/environment';
 import { SseService } from './sse.service';
 
 @Injectable({
@@ -8,7 +7,7 @@ import { SseService } from './sse.service';
 })
 export class ServersseService {
 
-  subj = new BehaviorSubject([]);
+  private subj = new BehaviorSubject([]);
   event!: EventSource;
   
   constructor(private sse: SseService) {
@@ -23,10 +22,11 @@ export class ServersseService {
 
   getSseEvent(source: string){
    this.event = this.sse.getServerEvent(source)
-   if(this.event){
-     this.event.onmessage = e => {
-      this.subj.next(JSON.parse(e.data))
-     }
-   }
+   let subject = this.subj;
+      this.event.onmessage=function(e)
+      {
+        console.log("Sse service received new event", e.data)
+        subject.next(e.data);
+      }
   }
 }

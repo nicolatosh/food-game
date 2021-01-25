@@ -7,6 +7,7 @@ import { getMatchFromService, getRandom } from "./utils";
 import e from "express";
 
 const axios = require('axios').default;
+const stream = require('central-event');
 
 //Server resources, should be accessed only via REST methods
 export var games: GameMatch[] = Array(); 
@@ -57,15 +58,16 @@ export const buildGame: (gamemode: string, matchtype: string) => Promise<GameMat
  * @param gameid 
  * @param userid 
  */
-export const opponentJoinGame: (gameid: string, userid: string) => Promise<true|false> = async (gameid,userid) => {
+export const opponentJoinGame: (gameid: string, userid: string) => Promise<GameMatch|false> = async (gameid,userid) => {
   const game = games.filter(e => e.gameid === gameid);
   var actual_game = game[0];
 
-  console.log("Opponent request receive")
+  console.log("Opponent join request received")
   //TODO check user id in Db
   if(actual_game && actual_game.game_status === GAME_STATUS.Waiting_opponent_connection){
     games[games.indexOf(actual_game)].game_status = GAME_STATUS.Started;
-    return true
+    stopOpponentConnectionTimer(gameid)
+    return actual_game
   }
   return false
 };
@@ -159,6 +161,29 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
             switch (actual_game.game_status){
               case GAME_STATUS.Started:
                 /**set match won, save stats, SYNC game => send post to both users */
+                if(actual_game.matches.length < MAX_MATCHES){    
+                  try {
+                    
+                    //getting new match
+                    let new_match = await getMatchFromService(actual_game.matches[0].match_type)
+                    if(new_match){
+                      games[games.indexOf(actual_game)].matches.push(new_match);
+                    }else{ return "Error getting match"; }
+                    console.log("Started new match:", new_match);
+
+                    //restarting timer for this new match
+                    startMatchTimer(gameid);
+                    return games[games.indexOf(actual_game)];
+                  } catch (error) {
+                    return e.toString();
+                  }   
+                }else{
+                  //at this point user finished all matches in the game
+                  games[games.indexOf(actual_game)].game_status = GAME_STATUS.Game_end;
+                  console.log("Game finished!");
+                  gameEnd(gameid);
+                  return "Game finished!";
+                }
                 break;
               
               case GAME_STATUS.Opponent_wrong_response:
@@ -267,6 +292,11 @@ function opponentConnectionTimeout(gameid: string): void{
   console.log(`Multyplayer game: ${gameid} failed to start. Opponent missing`);
 }
 
+function stopOpponentConnectionTimer(gameid: string): void{
+  const timerid = opponentConnectionTimers.get(gameid);
+  if(timerid != null){clearTimeout(timerid); opponentConnectionTimers.delete(gameid);}
+  console.log("Timer for opponent join stopped");
+}
 
 
 

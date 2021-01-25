@@ -9,13 +9,13 @@
  *   by the domain of the operation.
  */
 
-import { EventEmitter } from 'events';
-import { Request, Response } from 'express';
+import e, { Request, Response } from 'express';
 import { buildGame, getWelcome, processInput, opponentJoinGame, getMatchTypes } from './game';
 import { GAME_MODE, MATCH_TYPES } from './game_types';
 import { checkGameActive } from './utils';
 
-const Stream = new EventEmitter()
+const Stream = require('central-event');
+
 
 export const welcome = (req: Request, res: Response) => {
   // If in the URL (GET request) e.g. localhost:8080/?name=pippo
@@ -92,8 +92,13 @@ export const processUserInput = async (req: Request, res: Response) => {
   const userid = response_body['userid'];
   let game = checkGameActive(gameid);
 
+  let newGame = await processInput(gameid,answer,userid)
+  
   if(await game != false){
-    res.send(await processInput(gameid,answer,userid));
+    if(newGame.game_status == 'Started'){
+
+    }
+    res.send(newGame)
     res.status(200);
   }else{
     res.status(404);
@@ -108,29 +113,22 @@ export const processUserInput = async (req: Request, res: Response) => {
  */
 export const opponentJoin = async (req: Request, res: Response) => {
 
-  const gameid = String(req.query['gameid'])
-  const userid = String(req.query['userid'])
+  const response_body = req.body;
+  const gameid = response_body['gameid'];
+  const userid = response_body['userid'];
 
   let game = checkGameActive(gameid);
 
   if(await game != false){
-    let joined = await opponentJoinGame(gameid,userid);
-    
-    res.writeHead(200,{
-      'Content-type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive'
-    });
-
-    Stream.on('join', function(event,data){
-      res.write('event: ' + String(event) + '\n' + 'data: ' + JSON.stringify(data) + '\n\n')
-    });
+    let joined = await opponentJoinGame(gameid,userid)
 
     if(joined){
       Stream.emit('join', function(){
-        Stream.emit('join', 'message', { msg : 'joined'})
+        Stream.emit('join', 'message', { 'msg' : 'joined'})
       });
-    }
+    }   
+    res.status(200);
+    res.send(joined);
   }else{
     res.status(404);
     res.send({ error: 'Game does not exits!' });
@@ -139,5 +137,19 @@ export const opponentJoin = async (req: Request, res: Response) => {
 
 export const matchtypes = async (req: Request, res: Response) => {
   res.send(await getMatchTypes());
+}
+
+export const sse = async (req: Request, res: Response) => {
+  res.writeHead(200,{
+    'Content-type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive'
+  });
+
+  Stream.on('join', function(){
+    console.log("send event join")
+    res.write('event: message' +'\n' + 'data: ' + 'join' + '\n\n');
+    Stream.removeAllListeners('join')
+  });
 }
 

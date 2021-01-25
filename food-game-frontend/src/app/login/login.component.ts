@@ -24,10 +24,10 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
       this.route.queryParams
-      .subscribe(params => this.returnUrl = params['return'] || '/play');
-      if(this.isLogged().nickname){
+      .subscribe(params => this.returnUrl = params['return'] || '/play' + this.nickname);
+      if(this.isLogged()){
         console.log("User already logged in!")
-        this.router.navigateByUrl('/play');
+        this.router.navigateByUrl('/play' + this.nickname);
       }
   }
 
@@ -47,20 +47,15 @@ export class LoginComponent implements OnInit {
   login() {
     if(this.checkCredentials()){
       this.badCredentials = false;
-      if(!this.isLogged()){
         this.service.login(this.nickname, this.password)
         .subscribe((res:User) => {
           this.loginResponse = res;
           let user = this.isLogged();
-          if(user.nickname){
+          if(user != false){
             console.log(`User ${user.nickname} logged, redirecting...`)
-            this.router.navigateByUrl(this.returnUrl);
+            this.router.navigateByUrl(this.returnUrl + "/" + this.nickname);
           }
         });
-      }else{
-        console.log("User already logged in!")
-        this.router.navigateByUrl('/play');
-      }
     }else{
       this.badCredentials = true;
     }
@@ -73,9 +68,12 @@ export class LoginComponent implements OnInit {
     return true;
   }
   
-  isLogged():User {
-    let user: User = JSON.parse(localStorage.getItem('user') || '{}')
-    return user
+  isLogged(): User | false {
+    let user: User = JSON.parse(sessionStorage.getItem('user') || '{}')
+    if(user.nickname != undefined){
+      return user
+    }
+    return false
   }
 
 }

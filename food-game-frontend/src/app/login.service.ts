@@ -20,21 +20,22 @@ export class LoginService {
     })
   };
   constructor(private http: HttpClient) { 
-    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('user') || '{}'));
+    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(sessionStorage.getItem('user') || '{}'));
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
   login(nickname: string, password: string): Observable<User> {
     return this.http.post<User>(environment.apiLogin, { "nickname": nickname, "password": password}, this.httpOptions)
     .pipe(map((user:User) => {
-      localStorage.setItem('user', JSON.stringify(user));
+      sessionStorage.setItem('user', JSON.stringify(user));
       this.currentUserSubject.next(user);
       return user;
     }));
   }
 
   public get currentUserValue(): User {
-    return this.currentUserSubject.value;
+    console.log("CURRENT USER ", this.currentUserSubject.value)
+    return this.currentUserSubject.value
   }
   
   register(nickname: string, password: string): Observable<User> {
