@@ -2,7 +2,6 @@ import { Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { ServersseService } from '../serversse.service';
-import { SseService } from '../sse.service';
 
 @Component({
   selector: 'app-wait-opponent',
@@ -26,8 +25,9 @@ export class WaitOpponentComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.sse.returnAsObservable(environment.apiSse).subscribe((data:any) => {
 
+    
+    this.sse.returnAsObservable(environment.apiSse).subscribe((data:any) => {
       switch (data) {
         case 'join':
           console.log("Opponent joined!")

@@ -87,16 +87,18 @@ export class GameComponent implements OnInit, OnDestroy {
         break;
     
       case Modalities.MULTI:
+        let resMulti = this.gameService.getGame(this.gameid)
+        if(resMulti){
+          this.game = resMulti
+          this.lastMatch = this.game['matches'][this.game["matches"].length-1]
+        }else{
+          console.log("Game match faild to init. Game match:", resMulti)
+        }
+
         this.sse.returnAsObservable(environment.apiSse).subscribe((data:any) => {
           switch (data) {
             case 'join':
-              let res = this.gameService.getGame(this.gameid)
-              if(res){
-                this.game = res
-                this.lastMatch = this.game['matches'][this.game["matches"].length-1]
-              }else{
-                console.log("Game match faild to init. Game match:", res)
-              }
+              
               break;
           
             default:
@@ -106,8 +108,7 @@ export class GameComponent implements OnInit, OnDestroy {
         break;
       default:
         break;
-    }
-    
+    }  
   }
 
   buildAnswer(response:String, index:number){
@@ -120,6 +121,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
   sendAnswer(){
     if(this.answerToSend.answer.length > 0){
+      console.log("Sending this answer: ", this.answerToSend)
       this.gameService.sendAnswer(this.answerToSend)
         .subscribe((game) => {
           if(game.gameid){

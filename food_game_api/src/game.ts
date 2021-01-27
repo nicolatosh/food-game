@@ -5,6 +5,7 @@ import { json } from "body-parser";
 import { GAME_MODE, GAME_STATUS, MATCH_DURATION, MATCH_TYPES, MAX_MATCHES } from "./game_types";
 import { getMatchFromService, getRandom } from "./utils";
 import e from "express";
+import { AxiosError } from "axios";
 
 const axios = require('axios').default;
 const stream = require('central-event');
@@ -35,7 +36,7 @@ export const getWelcome: (name: string) => { text: string } = (name) => {
 export const buildGame: (gamemode: string, matchtype: string) => Promise<GameMatch | Error> = async (gamemode, matchtype) => {
   
     let match = await getMatchFromService(matchtype);
-    if(match){
+    if(match.id){
       let gameId = getRandom();
       switch(gamemode){
         case GAME_MODE.Single:
@@ -47,8 +48,11 @@ export const buildGame: (gamemode: string, matchtype: string) => Promise<GameMat
           //the opponent has a limited time to join the game
           games.push(new GameMatchImpl(gameId,gamemode,GAME_STATUS.Waiting_opponent_connection,match));
           startOpponentConnectionTimer(gameId);
+          startMatchTimer(gameId);
           break;
       }
+    }else{
+      throw { "error": "Error in getting matches"}
     }
     return games[games.length-1];
 };
@@ -58,7 +62,7 @@ export const buildGame: (gamemode: string, matchtype: string) => Promise<GameMat
  * @param gameid 
  * @param userid 
  */
-export const opponentJoinGame: (gameid: string, userid: string) => Promise<GameMatch|false> = async (gameid,userid) => {
+export const opponentJoinGame: (gameid: string, userid: string) => Promise<GameMatch | Error> = async (gameid,userid) => {
   const game = games.filter(e => e.gameid === gameid);
   var actual_game = game[0];
 
@@ -67,9 +71,10 @@ export const opponentJoinGame: (gameid: string, userid: string) => Promise<GameM
   if(actual_game && actual_game.game_status === GAME_STATUS.Waiting_opponent_connection){
     games[games.indexOf(actual_game)].game_status = GAME_STATUS.Started;
     stopOpponentConnectionTimer(gameid)
+
     return actual_game
   }
-  return false
+  return { "error": "cannot join game"}
 };
 
 /**
@@ -96,6 +101,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
   var actual_game = game[0];
   const timer = gamesTimers.get(gameid);
 
+  console.log("game: ",actual_game, game, "tiemr", timer)
   //at first check if game exist and timer for match is not expired
   if(actual_game && timer){
 

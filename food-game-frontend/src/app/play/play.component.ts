@@ -65,14 +65,15 @@ export class PlayComponent implements OnInit {
   join(){
     this.service.joinGame(this.gameid)
     .subscribe((game:GameMatch) => {
-      if(game){
-        console.log("GAME IN JOIN",game)
+      if(game != null){
+        console.log("Game join: ", game)
         let gameid = game["gameid"]
         this.gameService.setGame(game)
-        this.returnUrl = `/game/${this.gamemode}/${this.matchtype}/${gameid}/${this.loginService.currentUserValue.nickname}`
+        this.returnUrl = `game/${game.gamemode}/${game.matches[0].match_type}/${gameid}/${this.loginService.currentUserValue.nickname}`
+        console.log("Nvaigatin to", this.returnUrl)
         this.router.navigateByUrl(this.returnUrl);
       }else{
-        //error
+        console.log("Error in join. Game null")
       }
     });
   }
@@ -88,7 +89,7 @@ export class PlayComponent implements OnInit {
       case Modalities.SINGLE:
         this.service.initGame(this.gamemode,this.matchtype)
           .subscribe((game:GameMatch) => {
-            if(game){
+            if(game != null){
               let gameid = game["gameid"]
               this.gameService.setGame(game)
               this.returnUrl = `/game/${this.gamemode}/${this.matchtype}/${gameid}/${this.loginService.currentUserValue.nickname}`

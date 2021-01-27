@@ -31,14 +31,7 @@ export class PlayService {
     }
     return this.http.post<GameMatch>(environment.apiPlay, gamesettings, this.httpOptions)
     .pipe(
-      catchError((err) => {
-        console.log('error caught in service')
-        console.error(err);
-
-        //Handle the error here
-
-        return throwError(err);    //Rethrow it back to component
-      }),
+      catchError(this.handleError),
       map((game:GameMatch) => {
         if(game.gameid){
           return game;
@@ -57,20 +50,28 @@ export class PlayService {
 
     return this.http.post<GameMatch>(environment.apiJoin, gamesettings, this.httpOptions)
     .pipe(
-      catchError((err) => {
-        console.log('error caught in service')
-        console.error(err);
-
-        //Handle the error here
-
-        return throwError(err);    //Rethrow it back to component
-      }),
+      catchError(this.handleError.bind(this)),
       map((game:GameMatch) => {
         if(game.gameid){
           return game;
         }
         return game;
-      }
-    ))
+      }))
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    if (error.error instanceof ErrorEvent) {
+      // A client-side or network error occurred. Handle it accordingly.
+      console.error('An error occurred:', error.error.message);
+    } else {
+      // The backend returned an unsuccessful response code.
+      // The response body may contain clues as to what went wrong.
+      console.error(
+        `Backend returned code ${error.status}, ` +
+        `body was: ${error.error.error}`);
+    }
+    // Return an observable with a user-facing error message.
+    return throwError(
+      'Something bad happened; please try again later.');
   }
 }

@@ -24,10 +24,11 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
       this.route.queryParams
-      .subscribe(params => this.returnUrl = params['return'] || '/play' + this.nickname);
-      if(this.isLogged()){
+      .subscribe(params => this.returnUrl = params['return'] || '/play');
+      let user = this.isLogged()
+      if(user != false){
         console.log("User already logged in!")
-        this.router.navigateByUrl('/play' + this.nickname);
+        this.router.navigateByUrl(this.returnUrl + "/" + user.nickname);
       }
   }
 
@@ -53,7 +54,7 @@ export class LoginComponent implements OnInit {
           let user = this.isLogged();
           if(user != false){
             console.log(`User ${user.nickname} logged, redirecting...`)
-            this.router.navigateByUrl(this.returnUrl + "/" + this.nickname);
+            this.router.navigateByUrl(this.returnUrl + "/" + user.nickname);
           }else{
             console.log("User authentication failure")
             this.badCredentials = true

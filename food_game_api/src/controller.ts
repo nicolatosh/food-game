@@ -9,6 +9,7 @@
  *   by the domain of the operation.
  */
 
+import { AxiosError } from 'axios';
 import e, { Request, Response } from 'express';
 import { buildGame, getWelcome, processInput, opponentJoinGame, getMatchTypes } from './game';
 import { GAME_MODE, MATCH_TYPES } from './game_types';
@@ -47,11 +48,15 @@ export const play = async (req: Request, res: Response) => {
   const response_body = req.body;
   const gamemode = response_body['gamemode'];
   const matchtype = response_body['matchtype'];
+  let game = await buildGame(gamemode,matchtype).catch((e) =>{
+    res.status(400);
+    res.send({ error: e.error });
+  })
  
  //Checks on parameters
   if ((gamemode == GAME_MODE.Single || gamemode == GAME_MODE.Multiplayer) 
       && (matchtype == MATCH_TYPES.Rearrange_steps || matchtype == MATCH_TYPES.Select_ingredients)) {
-    res.send(await buildGame(gamemode,matchtype));
+    res.send(game);
   } else {
     res.status(400);
     res.send({ error: `Cannot start game with chosen settings: ${gamemode} ${matchtype}` });
@@ -96,7 +101,7 @@ export const processUserInput = async (req: Request, res: Response) => {
   
   if(await game != false){
     if(newGame.game_status == 'Started'){
-
+      
     }
     res.send(newGame)
     res.status(200);
@@ -120,15 +125,19 @@ export const opponentJoin = async (req: Request, res: Response) => {
   let game = checkGameActive(gameid);
 
   if(await game != false){
-    let joined = await opponentJoinGame(gameid,userid)
+    let joined = await opponentJoinGame(gameid,userid).catch( (e) => {
+      res.status(404);
+      res.send({ error: e.error });
+    })
 
-    if(joined){
+    if(await joined){
       Stream.emit('join', function(){
         Stream.emit('join', 'message', { 'msg' : 'joined'})
       });
+      res.status(200);
+      res.send(joined);
+      Stream.removeAllListeners('join')
     }   
-    res.status(200);
-    res.send(joined);
   }else{
     res.status(404);
     res.send({ error: 'Game does not exits!' });
@@ -149,7 +158,6 @@ export const sse = async (req: Request, res: Response) => {
   Stream.on('join', function(){
     console.log("send event join")
     res.write('event: message' +'\n' + 'data: ' + 'join' + '\n\n');
-    Stream.removeAllListeners('join')
   });
 }
 

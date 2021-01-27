@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import e from "express";
 import config from "../config";
 import { games } from "./game";
@@ -24,13 +25,13 @@ export function getRandom(): string {
  * Function to fetch a random match of specific type.
  * @param matchtype type of match to get 
  */
-export const getMatchFromService: (matchtype: string) => Promise<Match | false> = async (matchtype) => {
+export const getMatchFromService: (matchtype: string) => Promise<Match> = async (matchtype) => {
 
   try {
     let match = await axios.get(`${config.MATCH_SERVICE_URL}/match?type=${matchtype}`);
     let matchdata: Match = match.data;
     return matchdata;
   } catch (error) {
-    return false
+    return error
   }
 }
