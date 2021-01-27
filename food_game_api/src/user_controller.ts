@@ -1,3 +1,4 @@
+import axios, { AxiosError } from 'axios';
 import { Request, Response } from 'express';
 import { signinUser, loginUser } from './user';
 
@@ -33,7 +34,7 @@ export const login = async (req: Request, res: Response) => {
     const password = response_body['password'];
 
     //Checks on parameters
-     if ((nickname != null && nickname!= " ") && (password != null && password!= " ")) {
+     if ((nickname != null && nickname!= " ") && (password != null && password!= " ")){
        res.send(await loginUser(nickname,password));
      } else {
        res.status(400);

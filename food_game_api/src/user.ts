@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { json } from "body-parser";
 import e from "express";
 import config from "../config";
@@ -62,16 +63,17 @@ const insertUser: (nickname:string, password: string) => Promise<boolean> = asyn
  * @param nickname 
  * @param password 
  */
-export const loginUser: (nickname:string, password: string) => Promise<User> = async (nickname,password) =>{
+export const loginUser: (nickname:string, password: string) => Promise<User | AxiosError> = async (nickname,password) =>{
 
     try {
         let user = await axios.get(`${config.USER_SERVICE_URL}/user?nickname=${nickname}`);
         //comparing clear password with hashed one
         let userdata = user.data[0]
         let match: boolean = await checkUserPassword(password,userdata['password']);
-        console.log("Login succeed:" , match)
-        return { "nickname" : userdata['nickname']}
+        if(match){
+          return { "nickname" : userdata['nickname']}
+        }
       } catch (error) {
-        return error;
+        return error
       }
 }

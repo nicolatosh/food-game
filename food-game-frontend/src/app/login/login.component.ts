@@ -54,6 +54,9 @@ export class LoginComponent implements OnInit {
           if(user != false){
             console.log(`User ${user.nickname} logged, redirecting...`)
             this.router.navigateByUrl(this.returnUrl + "/" + this.nickname);
+          }else{
+            console.log("User authentication failure")
+            this.badCredentials = true
           }
         });
     }else{
@@ -61,6 +64,10 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  /**
+   * Checks actual nickname and password field that are binded
+   * to HTML form
+   */
   checkCredentials():boolean {
     if(this.nickname.length === 0 || this.password.length === 0){
       return false;

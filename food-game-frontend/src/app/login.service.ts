@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { IUser, User } from './app.types';
 
@@ -26,10 +26,15 @@ export class LoginService {
 
   login(nickname: string, password: string): Observable<User> {
     return this.http.post<User>(environment.apiLogin, { "nickname": nickname, "password": password}, this.httpOptions)
-    .pipe(map((user:User) => {
-      sessionStorage.setItem('user', JSON.stringify(user));
-      this.currentUserSubject.next(user);
-      return user;
+    .pipe(
+      map((user:User) => {
+        if(user != null){
+          sessionStorage.setItem('user', JSON.stringify(user));
+          this.currentUserSubject.next(user);
+          return user;
+        }else{
+          return new User("","")
+        }
     }));
   }
 
