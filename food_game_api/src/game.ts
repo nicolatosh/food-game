@@ -48,7 +48,6 @@ export const buildGame: (gamemode: string, matchtype: string) => Promise<GameMat
           //the opponent has a limited time to join the game
           games.push(new GameMatchImpl(gameId,gamemode,GAME_STATUS.Waiting_opponent_connection,match));
           startOpponentConnectionTimer(gameId);
-          startMatchTimer(gameId);
           break;
       }
     }else{
@@ -69,9 +68,9 @@ export const opponentJoinGame: (gameid: string, userid: string) => Promise<GameM
   console.log("Opponent join request received")
   //TODO check user id in Db
   if(actual_game && actual_game.game_status === GAME_STATUS.Waiting_opponent_connection){
-    games[games.indexOf(actual_game)].game_status = GAME_STATUS.Started;
+    games[games.indexOf(actual_game)].game_status = GAME_STATUS.Gaming;
     stopOpponentConnectionTimer(gameid)
-
+    startMatchTimer(gameid)
     return actual_game
   }
   return { "error": "cannot join game"}
@@ -165,7 +164,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
             localGamesStats.set(gameid, { "matchid": actual_game.matches[actual_game.matches.length-1].id, "winnerid": userid});
 
             switch (actual_game.game_status){
-              case GAME_STATUS.Started:
+              case GAME_STATUS.Gaming:
                 /**set match won, save stats, SYNC game => send post to both users */
                 if(actual_game.matches.length < MAX_MATCHES){    
                   try {
@@ -208,7 +207,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
             switch (actual_game.game_status){
 
               //user send bad response
-              case GAME_STATUS.Started:
+              case GAME_STATUS.Gaming:
                 //bad response. Game is now set to allow only answers from the other opponent
                 temporanyMatchStats.set(gameid, {"matchid": actual_game.matches[actual_game.matches.length-1].id, "bad_response_userid": userid });
                 games[games.indexOf(actual_game)].game_status = GAME_STATUS.Opponent_wrong_response;

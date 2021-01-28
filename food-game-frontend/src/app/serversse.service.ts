@@ -25,8 +25,8 @@ export class ServersseService {
    let subject = this.subj;
       this.event.onmessage=function(e)
       {
-        console.log("Sse service received new event", e.data)
-        subject.next(e.data);
+        console.log("Sse service received new event", JSON.parse(e.data))
+        subject.next(JSON.parse(e.data));
       }
   }
 }

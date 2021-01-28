@@ -11,6 +11,7 @@ export enum MATCH_TYPES {
 
 export enum GAME_STATUS {
   Started = "started",
+  Gaming = "gaming",
   Waiting_opponent_connection = "waiting_opponent_connection",
   Game_end = "game_end",
   Opponent_match_win = "opponet_match_win",

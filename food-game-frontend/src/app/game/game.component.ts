@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -24,6 +24,7 @@ export class GameComponent implements OnInit, OnDestroy {
   timerleftPercentage: number = 0;
   game: GameMatch;
   lastMatch!: Match;
+  answerSent: boolean;
   answerToSend: Answer = {
       "gameid": "",
       "userid": "",
@@ -38,7 +39,8 @@ export class GameComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private timer: TimerService,
     private gameService: GameService,
-    private sse: ServersseService
+    private sse: ServersseService,
+    private ngZone: NgZone
   ) {
     this.game = {
       'gameid' : "",
@@ -47,6 +49,7 @@ export class GameComponent implements OnInit, OnDestroy {
       'matches': []
     }
     this.timerSubscription = new Subscription
+    this.answerSent = false
   }
 
   ngOnDestroy(): void {
@@ -72,6 +75,23 @@ export class GameComponent implements OnInit, OnDestroy {
         "userid": this.usernick,
         "answer": []
       }
+
+      this.sse.returnAsObservable(environment.apiSse).subscribe((data:any) => {
+        switch (data.event) {
+          case 'nextmatch':
+            console.log("Setting next match", data.data)
+            this.gameService.setGame(data.data)
+            this.ngZone.run(() => this.processGame(data.data))
+            break;
+        
+          case 'gameend':
+            console.log("Game end event received")
+            this.ngZone.run(() => this.gameEnd(true))
+            break;
+          default:
+            break;
+        }
+      })
   }
 
   initMatch(){
@@ -94,17 +114,6 @@ export class GameComponent implements OnInit, OnDestroy {
         }else{
           console.log("Game match faild to init. Game match:", resMulti)
         }
-
-        this.sse.returnAsObservable(environment.apiSse).subscribe((data:any) => {
-          switch (data) {
-            case 'join':
-              
-              break;
-          
-            default:
-              break;
-          }
-        })
         break;
       default:
         break;
@@ -122,33 +131,10 @@ export class GameComponent implements OnInit, OnDestroy {
   sendAnswer(){
     if(this.answerToSend.answer.length > 0){
       console.log("Sending this answer: ", this.answerToSend)
+      this.answerSent = true
       this.gameService.sendAnswer(this.answerToSend)
         .subscribe((game) => {
-          if(game.gameid){
-            this.timer.stopTimer()
-            this.game = game;
-            this.lastMatch = this.game['matches'][this.game["matches"].length-1];
-            this.answerToSend.answer = [];
-            this.answerArray = [];
-            this.initMatch()
-            this.startTimer()
-            this.resetButtons()
-          }else{
-            switch (String(game)) {
-              case "Wrong answer":
-                  console.log("Wrong Answer");
-                  this.gameEnd(true)
-                break;
-
-              case "Game finished!":
-                  console.log("Game win");
-                  this.gameEnd(false)
-                break;
-            
-              default:
-                break;
-            }
-          }
+          this.ngZone.run(() => {this.processGame(game)})
         });
       
     }else{
@@ -190,5 +176,33 @@ export class GameComponent implements OnInit, OnDestroy {
       console.log("RESETTING", element)
       element.removeAttribute('disabled');
     })
+  }
+
+  processGame(game:GameMatch){
+    if(game.gameid){
+      this.timer.stopTimer()
+      this.game = game;
+      this.lastMatch = this.game['matches'][this.game["matches"].length-1];
+      this.answerToSend.answer = [];
+      this.answerArray = [];
+      this.initMatch()
+      this.startTimer()
+      this.resetButtons()
+    }else{
+      switch (String(game)) {
+        case "Wrong answer":
+            console.log("Wrong Answer");
+            this.gameEnd(true)
+          break;
+
+        case "Game finished!":
+            console.log("Game win");
+            this.gameEnd(false)
+          break;
+      
+        default:
+          break;
+      }
+    }
   }
 }

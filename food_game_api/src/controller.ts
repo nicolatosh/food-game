@@ -12,7 +12,8 @@
 import { AxiosError } from 'axios';
 import e, { Request, Response } from 'express';
 import { buildGame, getWelcome, processInput, opponentJoinGame, getMatchTypes } from './game';
-import { GAME_MODE, MATCH_TYPES } from './game_types';
+import { GAME_MODE, GAME_STATUS, MATCH_TYPES } from './game_types';
+import { GameMatch } from './types';
 import { checkGameActive } from './utils';
 
 const Stream = require('central-event');
@@ -100,11 +101,21 @@ export const processUserInput = async (req: Request, res: Response) => {
   let newGame = await processInput(gameid,answer,userid)
   
   if(await game != false){
-    if(newGame.game_status == 'Started'){
+    switch (newGame.game_status) {
+      case GAME_STATUS.Gaming:
+        Stream.emit('nextmatch', newGame)
+        res.send(newGame)
+        res.status(200)
+        break
       
+      case GAME_STATUS.Game_end:
+        Stream.emit('gameend', newGame)
+        res.send(newGame)
+        res.status(200)
+        break
+      default:
+        break;
     }
-    res.send(newGame)
-    res.status(200);
   }else{
     res.status(404);
     res.send({ error: 'Game does not exits!' });
@@ -132,7 +143,7 @@ export const opponentJoin = async (req: Request, res: Response) => {
 
     if(await joined){
       Stream.emit('join', function(){
-        Stream.emit('join', 'message', { 'msg' : 'joined'})
+        Stream.emit('join', { 'msg' : 'joined'})
       });
       res.status(200);
       res.send(joined);
@@ -157,7 +168,12 @@ export const sse = async (req: Request, res: Response) => {
 
   Stream.on('join', function(){
     console.log("send event join")
-    res.write('event: message' +'\n' + 'data: ' + 'join' + '\n\n');
+    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'join', 'data': ""}) + '\n\n');
+  });
+
+  Stream.on('nextmatch', (data:GameMatch) =>{
+    console.log("send event nextmatch",data)
+    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'nextmatch', 'data': data}) + '\n\n');
   });
 }
 
