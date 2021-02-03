@@ -22,6 +22,7 @@ export class GameComponent implements OnInit, OnDestroy {
   timeleft: number = 0;
   timerSubscription: Subscription;
   timerleftPercentage: number = 0;
+  wrongAnswer: boolean = false;
   game: GameMatch;
   lastMatch!: Match;
   answerSent: boolean;
@@ -82,12 +83,33 @@ export class GameComponent implements OnInit, OnDestroy {
             console.log("Setting next match", data.data)
             this.gameService.setGame(data.data)
             this.ngZone.run(() => this.processGame(data.data))
-            break;
+            break
         
           case 'gameend':
             console.log("Game end event received")
             this.ngZone.run(() => this.gameEnd(true))
-            break;
+            break
+
+          case 'wronganswer':
+            if(this.usernick === data.data.userid){
+              console.log("Wrong answer " + this.usernick)
+              this.wrongAnswer = true
+              this.timer.stopTimer()
+              this.timerSubscription.unsubscribe()
+            }
+            break
+          
+          case 'matchwin':
+            console.log("Setting next match", data.data)
+            this.gameService.setGame(data.data)
+            this.ngZone.run(() => this.processGame(data.data))
+            break
+          
+          case 'gamefailure':
+            console.log("Game failure event received")
+            this.ngZone.run(() => this.gameEnd(true))
+            break
+
           default:
             break;
         }
@@ -130,6 +152,8 @@ export class GameComponent implements OnInit, OnDestroy {
 
   sendAnswer(){
     if(this.answerToSend.answer.length > 0){
+      let element = document.getElementById("sendButton") as HTMLElement;
+      element.setAttribute('disabled', 'true');
       console.log("Sending this answer: ", this.answerToSend)
       this.answerSent = true
       this.gameService.sendAnswer(this.answerToSend)
@@ -171,6 +195,8 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   resetButtons(){
+    let btn = document.getElementById("sendButton") as HTMLElement;
+    btn.removeAttribute('disabled');
     this.disabledButtons.forEach(e => {
       let element = document.getElementById(String(e)) as HTMLElement;
       console.log("RESETTING", element)
@@ -178,20 +204,33 @@ export class GameComponent implements OnInit, OnDestroy {
     })
   }
 
+  /**
+   * This function is responsible to perform some actions on a given
+   * GameMatch. It updates the current GameMatch that is being shown
+   * by the whole application. Typically a new GameMatch can be revived
+   * after user send an anwer for a match.
+   * This fucntion updates the "view" according to the game. Manages also
+   * errors in case of Single player mode.
+   * If game is not an instace of GameMatch, some strings describing
+   * errors should be passed.
+   * @param game 
+   */
   processGame(game:GameMatch){
     if(game.gameid){
       this.timer.stopTimer()
+      this.timerSubscription.unsubscribe()
       this.game = game;
+      this.wrongAnswer = false;
       this.lastMatch = this.game['matches'][this.game["matches"].length-1];
       this.answerToSend.answer = [];
       this.answerArray = [];
       this.initMatch()
       this.startTimer()
       this.resetButtons()
-    }else{
+    }else if (this.gamemode === Modalities.SINGLE){
       switch (String(game)) {
         case "Wrong answer":
-            console.log("Wrong Answer");
+            console.log("Wrong answer");
             this.gameEnd(true)
           break;
 

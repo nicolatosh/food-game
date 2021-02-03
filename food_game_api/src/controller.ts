@@ -113,6 +113,24 @@ export const processUserInput = async (req: Request, res: Response) => {
         res.send(newGame)
         res.status(200)
         break
+      
+      case GAME_STATUS.Opponent_wrong_response:
+        Stream.emit('wronganswer', {userid: userid})
+        res.send("Wrong answer")
+        res.status(200)
+        break
+      
+      case GAME_STATUS.Opponent_match_win:
+        Stream.emit('matchwin', newGame)
+        res.send(newGame)
+        res.status(200)
+        break
+
+      case GAME_STATUS.Both_user_failure:
+        Stream.emit('gamefailure', newGame)
+        res.send(newGame)
+        res.status(200)
+
       default:
         break;
     }
@@ -136,7 +154,7 @@ export const opponentJoin = async (req: Request, res: Response) => {
   let game = checkGameActive(gameid);
 
   if(await game != false){
-    let joined = await opponentJoinGame(gameid,userid).catch( (e) => {
+    let joined = await opponentJoinGame(gameid,userid).catch((e) => {
       res.status(404);
       res.send({ error: e.error });
     })
@@ -174,6 +192,26 @@ export const sse = async (req: Request, res: Response) => {
   Stream.on('nextmatch', (data:GameMatch) =>{
     console.log("send event nextmatch",data)
     res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'nextmatch', 'data': data}) + '\n\n');
+  });
+
+  Stream.on('wronganswer', (data:GameMatch) =>{
+    console.log("send event wronganswer",data)
+    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'wronganswer', 'data': data}) + '\n\n');
+  });
+
+  Stream.on('matchwin', (data:GameMatch) =>{
+    console.log("send event matchwin",data)
+    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'matchwin', 'data': data}) + '\n\n');
+  });
+
+  Stream.on('gameend', (data:GameMatch) =>{
+    console.log("send event gameend",data)
+    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'gameend', 'data': data}) + '\n\n');
+  });
+
+  Stream.on('gamefailure', (data:GameMatch) =>{
+    console.log("send event gamefailure",data)
+    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'gamefailure', 'data': data}) + '\n\n');
   });
 }
 

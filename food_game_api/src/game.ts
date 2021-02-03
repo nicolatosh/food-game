@@ -5,7 +5,6 @@ import { json } from "body-parser";
 import { GAME_MODE, GAME_STATUS, MATCH_DURATION, MATCH_TYPES, MAX_MATCHES } from "./game_types";
 import { getMatchFromService, getRandom } from "./utils";
 import e from "express";
-import { AxiosError } from "axios";
 
 const axios = require('axios').default;
 const stream = require('central-event');
@@ -87,7 +86,6 @@ export const getMatchTypes: () => Promise<any> = async () =>{
   return matches
 }
 
-/*TODO consider "select_ingredients" types of matches
 /**
  * This function is the core of game logic. Once user 
  * 
@@ -187,7 +185,8 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                   games[games.indexOf(actual_game)].game_status = GAME_STATUS.Game_end;
                   console.log("Game finished!");
                   gameEnd(gameid);
-                  return "Game finished!";
+                  console.log("STATS SAVED", localGamesStats.get(actual_game.gameid))
+                  return actual_game;
                 }
                 break;
               
@@ -197,6 +196,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                   return "You cannot send another response";
                 }else{
                   /**set match won, save stats, SYNC game => send post to both users */
+                  return actual_game
                 }
 
                 break;
@@ -212,7 +212,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                 temporanyMatchStats.set(gameid, {"matchid": actual_game.matches[actual_game.matches.length-1].id, "bad_response_userid": userid });
                 games[games.indexOf(actual_game)].game_status = GAME_STATUS.Opponent_wrong_response;
                 console.log("Wrong answer from user:", userid);
-                return "Wrong answer";
+                return actual_game;
 
               //this case means that both users have sent a bad answer
               //game can go to next match.
@@ -223,7 +223,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                   return "You cannot send another response";
                 }else{
                   games[games.indexOf(actual_game)].game_status = GAME_STATUS.Both_user_failure;
-                  return "Wrong answer";
+                  return actual_game;
                 }
             }
           }
