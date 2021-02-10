@@ -30,6 +30,6 @@ export class TimerService {
   stopTimer():void {
     clearInterval(this.timer);
     this.timeLeft = 10;
-    this.timeLeftSubject.next(this.timeLeft)
+    this.timeLeftSubject.next(10)
   }
 }

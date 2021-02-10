@@ -13,7 +13,7 @@ const stream = require('central-event');
 export var games: GameMatch[] = Array(); 
 var gamesTimers: Map<String, NodeJS.Timeout> = new Map<String, NodeJS.Timeout>();
 var opponentConnectionTimers: Map<String, NodeJS.Timeout> = new Map<String, NodeJS.Timeout>();
-var localGamesStats: Map<String, MatchStats> = new Map<String, MatchStats>();
+var localGamesStats: Map<String, Array<MatchStats>> = new Map<String, Array<MatchStats>>();
 var temporanyMatchStats: Map<String, MatchStatsTemporany> = new Map<String, MatchStatsTemporany>();
 
 
@@ -39,7 +39,7 @@ export const buildGame: (gamemode: string, matchtype: string) => Promise<GameMat
       let gameId = getRandom();
       switch(gamemode){
         case GAME_MODE.Single:
-          games.push(new GameMatchImpl(gameId,gamemode,GAME_STATUS.Started,match));
+          games.push(new GameMatchImpl(gameId,gamemode,GAME_STATUS.Single_started,match));
           startMatchTimer(gameId);
           break;
         case GAME_MODE.Multiplayer:
@@ -70,6 +70,7 @@ export const opponentJoinGame: (gameid: string, userid: string) => Promise<GameM
     games[games.indexOf(actual_game)].game_status = GAME_STATUS.Gaming;
     stopOpponentConnectionTimer(gameid)
     startMatchTimer(gameid)
+    localGamesStats.set(gameid, new Array());
     return actual_game
   }
   return { "error": "cannot join game"}
@@ -98,7 +99,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
   var actual_game = game[0];
   const timer = gamesTimers.get(gameid);
 
-  console.log("game: ",actual_game, game, "tiemr", timer)
+  console.log("game: ",actual_game, game, "timer", timer)
   //at first check if game exist and timer for match is not expired
   if(actual_game && timer){
 
@@ -116,9 +117,9 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
             stopMatchTimer(gameid);
             console.log("User won the match: ", actual_game.matches[actual_game.matches.length-1]);
             //saving some stats
-            localGamesStats.set(gameid, { "matchid": actual_game.matches[actual_game.matches.length-1].id, "winnerid": userid});
+            localGamesStats.get(actual_game.gameid)?.push({ "matchid": actual_game.matches[actual_game.matches.length-1].id, "winnerid": userid})
             switch (actual_game.game_status){
-              case GAME_STATUS.Started:
+              case GAME_STATUS.Single_started:
 
                 //if it is not the last match, just create a new one of the same type
                 if(actual_game.matches.length < MAX_MATCHES){    
@@ -139,8 +140,9 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                   }   
                 }else{
                   //at this point user finished all matches in the game
-                  games[games.indexOf(actual_game)].game_status = GAME_STATUS.Game_end;
+                  games[games.indexOf(actual_game)].game_status = GAME_STATUS.Single_end;
                   console.log("Game finished!");
+                  stopMatchTimer(actual_game.gameid)
                   gameEnd(gameid);
                   return "Game finished!";
                 }
@@ -148,7 +150,13 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
               case GAME_STATUS.Game_end:
                 return "Game finished! No more response allowed";
             }
-          }else{return "Wrong answer"}
+          }else{
+            games[games.indexOf(actual_game)].game_status = GAME_STATUS.Single_failure;
+            console.log("Game failed!");
+            stopMatchTimer(actual_game.gameid)
+            gameEnd(gameid);
+            return "Wrong answer"
+          }
         break;
 
         case GAME_MODE.Multiplayer:
@@ -159,7 +167,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
             //game current status and perform the right action
             console.log("User won the match: ", actual_game.matches[actual_game.matches.length-1]);
             //saving some stats
-            localGamesStats.set(gameid, { "matchid": actual_game.matches[actual_game.matches.length-1].id, "winnerid": userid});
+            localGamesStats.get(actual_game.gameid)?.push({ "matchid": actual_game.matches[actual_game.matches.length-1].id, "winnerid": userid})
 
             switch (actual_game.game_status){
               case GAME_STATUS.Gaming:
@@ -184,6 +192,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                   //at this point user finished all matches in the game
                   games[games.indexOf(actual_game)].game_status = GAME_STATUS.Game_end;
                   console.log("Game finished!");
+                  stopMatchTimer(actual_game.gameid)
                   gameEnd(gameid);
                   console.log("STATS SAVED", localGamesStats.get(actual_game.gameid))
                   return actual_game;
@@ -196,6 +205,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                   return "You cannot send another response";
                 }else{
                   /**set match won, save stats, SYNC game => send post to both users */
+                  stopMatchTimer(actual_game.gameid)
                   return actual_game
                 }
 
@@ -222,6 +232,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                 if(temporanyMatchStats.get(gameid)?.bad_response_userid === userid){
                   return "You cannot send another response";
                 }else{
+                  stopMatchTimer(actual_game.gameid)
                   games[games.indexOf(actual_game)].game_status = GAME_STATUS.Both_user_failure;
                   return actual_game;
                 }
@@ -253,6 +264,7 @@ function gameEnd(gameid: string): void {
 function matchExpired(gameid: string): void {
   gamesTimers.delete(gameid);
   gameEnd(gameid); 
+  stream.emit('matchexpired')
   console.log(`Match expired for gameId: ${gameid}`);
 };
 
@@ -278,8 +290,8 @@ function stopMatchTimer(gameid: string): void {
 }
 
 function checkAnswer(game: GameMatch, answer: string[]): boolean {
-  console.log("Correct answer: ", answer, "User answer: ", game.matches[0].answer);
-  return game.matches[game.matches.length-1].answer.toString() === answer.toString()
+  console.log("Correct answer: ", game.matches[0].answer, "User answer: ", answer);
+  return game.matches[game.matches.length-1].answer.toString().localeCompare(answer.toString()) === 0
 }
 
 function startOpponentConnectionTimer(gameid: string): void{
@@ -303,6 +315,23 @@ function stopOpponentConnectionTimer(gameid: string): void{
   console.log("Timer for opponent join stopped");
 }
 
+export const choseWinner: (gameid: string) => Promise<any> = async (gameid) => {
+  let matchesStats = localGamesStats.get(gameid)
+  if(matchesStats != undefined){
+    let user = matchesStats[0].winnerid
+    let cnt = 0
+    matchesStats.forEach(element => {
+      element.winnerid === user ? cnt+=1 : ""
+    });
+    console.log("Match stats:", matchesStats)
+    
+    if(cnt < (matchesStats.length / 2)){
+      let user2 = matchesStats.filter( e => e.winnerid != user)
+      return user2[0].winnerid
+    }
+    return user
+  }
+}
 
 
 

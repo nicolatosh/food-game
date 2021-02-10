@@ -87,15 +87,21 @@ export class GameComponent implements OnInit, OnDestroy {
         
           case 'gameend':
             console.log("Game end event received")
-            this.ngZone.run(() => this.gameEnd(true))
+            this.timer.stopTimer()
+            this.timerSubscription.unsubscribe()
+            if(this.usernick === data.data.userid){
+              console.log("Congratulation " + this.usernick + " you win!")
+              this.ngZone.run(() => this.gameEnd(false))
+            }else{
+              console.log("Ops! " + this.usernick + " you lost!")
+              this.ngZone.run(() => this.gameEnd(true))
+            }
             break
 
           case 'wronganswer':
             if(this.usernick === data.data.userid){
               console.log("Wrong answer " + this.usernick)
               this.wrongAnswer = true
-              this.timer.stopTimer()
-              this.timerSubscription.unsubscribe()
             }
             break
           
@@ -110,6 +116,11 @@ export class GameComponent implements OnInit, OnDestroy {
             this.ngZone.run(() => this.gameEnd(true))
             break
 
+          case 'matchexpired':
+            console.log("Match time is up. Ending game")
+            this.ngZone.run(() => this.gameEnd(true))
+            break
+            
           default:
             break;
         }
@@ -158,7 +169,8 @@ export class GameComponent implements OnInit, OnDestroy {
       this.answerSent = true
       this.gameService.sendAnswer(this.answerToSend)
         .subscribe((game) => {
-          this.ngZone.run(() => {this.processGame(game)})
+          this.ngZone.run(() => {
+            if(this.game.gamemode === Modalities.SINGLE) {this.processGame(game)}})
         });
       
     }else{
@@ -178,9 +190,14 @@ export class GameComponent implements OnInit, OnDestroy {
     })
   }
   
+  /**
+   * This method allows to redirect user to win or lost pages.
+   * If user has lost then a true value should be supplied.
+   * @param lost boolean. If user won the game should be false.
+   */
   gameEnd(lost:boolean){
-    this.timer.stopTimer()
     this.timerSubscription.unsubscribe()
+    this.timer.stopTimer()
     if(lost){
       this.returnUrl = `/game/lose`
       this.router.navigateByUrl(this.returnUrl);
@@ -199,7 +216,6 @@ export class GameComponent implements OnInit, OnDestroy {
     btn.removeAttribute('disabled');
     this.disabledButtons.forEach(e => {
       let element = document.getElementById(String(e)) as HTMLElement;
-      console.log("RESETTING", element)
       element.removeAttribute('disabled');
     })
   }

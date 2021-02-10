@@ -9,9 +9,8 @@
  *   by the domain of the operation.
  */
 
-import { AxiosError } from 'axios';
-import e, { Request, Response } from 'express';
-import { buildGame, getWelcome, processInput, opponentJoinGame, getMatchTypes } from './game';
+import { Request, Response } from 'express';
+import { buildGame, getWelcome, processInput, opponentJoinGame, getMatchTypes, choseWinner } from './game';
 import { GAME_MODE, GAME_STATUS, MATCH_TYPES } from './game_types';
 import { GameMatch } from './types';
 import { checkGameActive } from './utils';
@@ -57,6 +56,7 @@ export const play = async (req: Request, res: Response) => {
  //Checks on parameters
   if ((gamemode == GAME_MODE.Single || gamemode == GAME_MODE.Multiplayer) 
       && (matchtype == MATCH_TYPES.Rearrange_steps || matchtype == MATCH_TYPES.Select_ingredients)) {
+    Stream.removeAllListeners('matchwin')
     res.send(game);
   } else {
     res.status(400);
@@ -109,29 +109,37 @@ export const processUserInput = async (req: Request, res: Response) => {
         break
       
       case GAME_STATUS.Game_end:
-        Stream.emit('gameend', newGame)
+        let winner = choseWinner(newGame.gameid)
+        Stream.emit('gameend', {userid: await winner})
+        Stream.removeAllListeners('gameend')
         res.send(newGame)
         res.status(200)
         break
       
       case GAME_STATUS.Opponent_wrong_response:
         Stream.emit('wronganswer', {userid: userid})
+        Stream.removeAllListeners('wronganswer')
         res.send("Wrong answer")
         res.status(200)
         break
       
       case GAME_STATUS.Opponent_match_win:
         Stream.emit('matchwin', newGame)
+        Stream.removeAllListeners('matchwin')
         res.send(newGame)
         res.status(200)
         break
 
       case GAME_STATUS.Both_user_failure:
-        Stream.emit('gamefailure', newGame)
+        Stream.emit('gamefailure')
+        Stream.removeAllListeners('gamefailure')
+        res.send("Game failure")
+        res.status(200)
+        break
+
+      default: 
         res.send(newGame)
         res.status(200)
-
-      default:
         break;
     }
   }else{
@@ -190,28 +198,33 @@ export const sse = async (req: Request, res: Response) => {
   });
 
   Stream.on('nextmatch', (data:GameMatch) =>{
-    console.log("send event nextmatch",data)
+    console.log("send event nextmatch")
     res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'nextmatch', 'data': data}) + '\n\n');
   });
 
   Stream.on('wronganswer', (data:GameMatch) =>{
-    console.log("send event wronganswer",data)
+    console.log("send event wronganswer")
     res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'wronganswer', 'data': data}) + '\n\n');
   });
 
   Stream.on('matchwin', (data:GameMatch) =>{
-    console.log("send event matchwin",data)
+    console.log("send event matchwin")
     res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'matchwin', 'data': data}) + '\n\n');
   });
 
   Stream.on('gameend', (data:GameMatch) =>{
-    console.log("send event gameend",data)
+    console.log("send event gameend")
     res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'gameend', 'data': data}) + '\n\n');
   });
 
-  Stream.on('gamefailure', (data:GameMatch) =>{
-    console.log("send event gamefailure",data)
-    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'gamefailure', 'data': data}) + '\n\n');
+  Stream.on('gamefailure', function() {
+    console.log("send event gamefailure")
+    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'gamefailure', 'data': {}}) + '\n\n');
   });
+
+  Stream.on('matchexpired', function() {
+    console.log("send event gamefailure")
+    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'matchexpired', 'data': {}}) + '\n\n');
+ });
 }
 

@@ -10,7 +10,9 @@ export enum MATCH_TYPES {
 }
 
 export enum GAME_STATUS {
-  Started = "started",
+  Single_started = "single_started",
+  Single_end = "single_end",
+  Single_failure = "single_failure",
   Gaming = "gaming",
   Waiting_opponent_connection = "waiting_opponent_connection",
   Game_end = "game_end",
@@ -22,5 +24,5 @@ export enum GAME_STATUS {
 //Nummber of milliseconds. 5000 = 5 seconds
 export const MATCH_DURATION: Number = 5000;
 
-export const MAX_MATCHES: Number = 2;
+export const MAX_MATCHES: Number = 3;
 
