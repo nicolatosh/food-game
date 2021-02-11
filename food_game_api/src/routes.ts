@@ -43,5 +43,6 @@ router.post('/register',signin)
 router.post('/login',login)
 router.get('/matchtypes', matchtypes)
 router.get('/sse', sse)
+router.get('/info', welcome)
 
 export default router;

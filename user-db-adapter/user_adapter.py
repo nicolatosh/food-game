@@ -13,7 +13,8 @@ client = MongoClient('user_db', 27017)
 db = client.user_db
 collection = db.user
 
-# This is how user look like
+# This is how user look like. It is used to define a schema
+# that specify how the resource 'user' is
 userSchema = {
     "title": "User",
     "type": "object",
@@ -36,6 +37,9 @@ def validate_json(json_data, schema):
     return True
 
 
+# This route can be used to check if the adapter service is
+# working properly. It returns a Json response describing 
+# the connection with DB and its information
 @app.route('/info')
 def info():
     connection = "User adapter and user Mongodb are Online!"
@@ -56,15 +60,19 @@ def info():
     return response
 
 
-# Endpoint that allows user to signing or to login
+# Endpoint that allows user to signing or to login.
+# In case of successful Post it returns the nick of user
+# In case of successful Get it returns the nick of user
 @app.route('/user', methods=['POST', 'GET'])
 def add_recipe():
 
+    # POST allows to add a user 
     if request.method == 'POST':
         req_data = request.get_json()
         response = make_response({"nickname": req_data['nickname']})
         response.headers['Content-Type'] = 'application/json'
         
+        # Validation of the supplied Json format user
         if validate_json(req_data, userSchema):
             print("User register request received")
             if not is_user_duplicate(req_data["nickname"]):
@@ -92,14 +100,15 @@ def add_recipe():
         if len(result):
             response.status_code = 200
             response = make_response(json.dumps(result, default=str))
+            response.headers.add("Access-Control-Allow-Origin", "*")
             return response
-        response = make_response({"error": 'User with nickname {nick} do not exist'})
+        response = make_response({"error": 'User with nickname' + str(nick) + 'do not exist'})
         response.status_code = 400
         return response
         
 
 
-# Function to check if a nickname already exist
+# Function to check if a nickname already exist in DB
 def is_user_duplicate(nick):
     query = {"nickname": nick}
     res = list(collection.find(query))

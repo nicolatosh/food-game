@@ -9,7 +9,7 @@ var cors = require('cors');
 // const PORT: number = process.env.DEPLOY === "local" ? config.PORT : parseInt(<string>process.env.PORT, 10);
 // const HOSTNAME = process.env.DEPLOY === "local" ? config.HOSTNAME : "food-game.herokuapp.com";
 const PORT = 30000;
-const HOSTNAME = 'localhost';
+const HOSTNAME = "0.0.0.0"
 
 const app = express();
 app.use(errorHandler());
