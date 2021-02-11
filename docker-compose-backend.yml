@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 services:
 
@@ -26,7 +26,9 @@ services:
     networks:
       app_net:
         ipv4_address: 172.16.238.40
-  
+    depends_on:
+      - "recipes_db"
+    
   user_db_adapter:
     build:
       context: ./user-db-adapter
@@ -35,24 +37,8 @@ services:
     networks:
       app_net:
         ipv4_address: 172.16.238.50
-  
-  food_api:
-    build: 
-      context: ./food_game_api
-    ports: 
-      - "30000:30000"
-    networks: 
-      app_net:
-        ipv4_address: 172.16.238.60
-
-  food_frontend:
-    build: 
-      context: ./food-game-frontend
-    ports: 
-      - "4200:4200"
-    networks: 
-      app_net:
-        ipv4_address: 172.16.238.70
+    depends_on:
+      - "user_db"
   
   matchservice:
     build: 
@@ -62,6 +48,8 @@ services:
     networks: 
       app_net:
         ipv4_address: 172.16.238.80
+    depends_on:
+      - "recipes_db"
 
 networks:
   app_net:

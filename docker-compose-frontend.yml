@@ -1,0 +1,19 @@
+version: '3.3'
+
+services:
+  
+  food_api:
+    build: 
+      context: ./food_game_api
+    ports: 
+      - "30000:30000"
+    environment: 
+      - BACKEND: "172.20.1.5"
+
+  food_frontend:
+    build: 
+      context: ./food-game-frontend
+    ports: 
+      - "4200:4200"
+    depends_on:
+      - "food_api"
