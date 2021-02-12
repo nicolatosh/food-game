@@ -1,15 +1,16 @@
+/**
+ * This is a core module. Contains the implementation of the game logic functionalities.
+ */
 
-import { Error, GameMatch, GameMatchImpl, Match, MatchStats, MatchStatsTemporany } from "./types";
-import config from "../config"
-import { json } from "body-parser";
-import { GAME_MODE, GAME_STATUS, MATCH_DURATION, MATCH_TYPES, MAX_MATCHES } from "./game_types";
+import { Error, GameMatch, GameMatchImpl,MatchStats, MatchStatsTemporany } from "./types";
+import { GAME_MODE, GAME_STATUS, MATCH_TYPES, MAX_MATCHES } from "./game_types";
 import { getMatchFromService, getRandom } from "./utils";
 import e from "express";
 
 const axios = require('axios').default;
 const stream = require('central-event');
 
-//Server resources, should be accessed only via REST methods
+// Server resources, should be accessed only via HTTP rest methods
 export var games: GameMatch[] = Array(); 
 var gamesTimers: Map<String, NodeJS.Timeout> = new Map<String, NodeJS.Timeout>();
 var opponentConnectionTimers: Map<String, NodeJS.Timeout> = new Map<String, NodeJS.Timeout>();
@@ -17,16 +18,9 @@ var localGamesStats: Map<String, Array<MatchStats>> = new Map<String, Array<Matc
 var temporanyMatchStats: Map<String, MatchStatsTemporany> = new Map<String, MatchStatsTemporany>();
 
 
-
-export const getWelcome: (name: string) => { text: string } = (name) => {
-  return {
-    text: `Hello ${name} CIAO`,
-  };
-};
-
 /**
  * Creates an instance of "game" which is a container for
- * all game related info so that the game instace can be 
+ * all game resources with related info so that the game instace can be 
  * interpreted and understood from users
  * 
  * @param gamemode one of available 
@@ -57,6 +51,8 @@ export const buildGame: (gamemode: string, matchtype: string) => Promise<GameMat
 
 /**
  * Function to allow another user to play a multyplayer game.
+ * Checks if the game can accept an opponent and also if the opponent
+ * is allowed to play.
  * @param gameid 
  * @param userid 
  */
@@ -64,16 +60,19 @@ export const opponentJoinGame: (gameid: string, userid: string) => Promise<GameM
   const game = games.filter(e => e.gameid === gameid);
   var actual_game = game[0];
 
-  console.log("Opponent join request received")
-  //TODO check user id in Db
+  console.log("Opponent Join request received")
+  
+  // Checking if the game is in the satus so that can accept an opponet
   if(actual_game && actual_game.game_status === GAME_STATUS.Waiting_opponent_connection){
     games[games.indexOf(actual_game)].game_status = GAME_STATUS.Gaming;
     stopOpponentConnectionTimer(gameid)
     startMatchTimer(gameid)
     localGamesStats.set(gameid, new Array());
     return actual_game
+  }else{
+    return { "error": "game is not joinable"}
   }
-  return { "error": "cannot join game"}
+  
 };
 
 /**
@@ -88,10 +87,15 @@ export const getMatchTypes: () => Promise<any> = async () =>{
 }
 
 /**
- * This function is the core of game logic. Once user 
+ * This function is the core of game logic. Manages the response once the user
+ * sent an answer for a match in a game. It modifies the game status according
+ * to user answer so game can finish, fail etc.
+ * Produces new matches and saves temporany stats.
+ * Returns an updated GameMatch {@see GameMatch} or can raise errors.
  * 
  * @param gameid 
  * @param answer 
+ * @param userid
  */
 export const processInput: (gameid: string, answer: string[], userid: string) => Promise<GameMatch | any> = async (gameid,answer,userid) => {
   
@@ -99,11 +103,10 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
   var actual_game = game[0];
   const timer = gamesTimers.get(gameid);
 
-  console.log("game: ",actual_game, game, "timer", timer)
   //at first check if game exist and timer for match is not expired
   if(actual_game && timer){
 
-      //separate cases for single player mode and multyplayer
+      //separate cases for single player mode and multiplayer
       switch(actual_game.gamemode){
 
         case GAME_MODE.Single:
@@ -194,7 +197,6 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                   console.log("Game finished!");
                   stopMatchTimer(actual_game.gameid)
                   gameEnd(gameid);
-                  console.log("STATS SAVED", localGamesStats.get(actual_game.gameid))
                   return actual_game;
                 }
                 break;
@@ -204,11 +206,16 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                 if(temporanyMatchStats.get(gameid)?.bad_response_userid === userid){
                   return "You cannot send another response";
                 }else{
-                  /**set match won, save stats, SYNC game => send post to both users */
                   stopMatchTimer(actual_game.gameid)
-                  return actual_game
+                  let new_match = await getMatchFromService(actual_game.matches[0].match_type)
+                    if(new_match){
+                      games[games.indexOf(actual_game)].matches.push(new_match);
+                    }else{ return "Error getting match"; }
+                    console.log("Started new match:", new_match);
+                    //restarting timer for this new match
+                    startMatchTimer(gameid);
+                    return games[games.indexOf(actual_game)];
                 }
-
                 break;
             }
 
@@ -234,33 +241,35 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                 }else{
                   stopMatchTimer(actual_game.gameid)
                   games[games.indexOf(actual_game)].game_status = GAME_STATUS.Both_user_failure;
+                  gameEnd(actual_game.gameid)
                   return actual_game;
                 }
             }
           }
-
         break;
       }
-
     }else{
-      return "Game not found"
+      return {"error" : "Game not found"}
     }
 };
 
 
 /**
- * Set the game to "end" status.
+ * Ending the game: removing from game list.
  * @param gameid 
  */
 function gameEnd(gameid: string): void {
-
   const game = games.filter(e => e.gameid === gameid);
-  game[0].gamemode = GAME_STATUS.Game_end;
-  //games.splice(games.indexOf(game[0],1));
+  games.splice(games.indexOf(game[0],1));
 }
 
 
-//TODO when exipres delete game
+/**
+ * Manages match expired event. If happens the
+ * game is aborted. 
+ * Matchexpired event is sent via SSE-event
+ * @param gameid 
+ */
 function matchExpired(gameid: string): void {
   gamesTimers.delete(gameid);
   gameEnd(gameid); 
@@ -298,15 +307,18 @@ function startOpponentConnectionTimer(gameid: string): void{
   
   const timerid: ReturnType<typeof setTimeout> = setTimeout(() => {
     opponentConnectionTimeout(gameid)
-  }, 10000);
+  }, 15000);
 
   opponentConnectionTimers.set(gameid,timerid);
 }
 
 function opponentConnectionTimeout(gameid: string): void{
   const opponentTimer = opponentConnectionTimers.get(gameid);
-  if(opponentTimer != null){clearTimeout(opponentTimer); opponentConnectionTimers.delete(gameid);}
-  console.log(`Multyplayer game: ${gameid} failed to start. Opponent missing`);
+  if(opponentTimer != null){
+    clearTimeout(opponentTimer)
+    opponentConnectionTimers.delete(gameid)
+  }
+  console.log(`Multiplayer game: ${gameid} failed to start. Opponent missing`);
 }
 
 function stopOpponentConnectionTimer(gameid: string): void{
@@ -315,6 +327,11 @@ function stopOpponentConnectionTimer(gameid: string): void{
   console.log("Timer for opponent join stopped");
 }
 
+/**
+ * Performs a check on a game to state who is the winner.
+ * The policy is: user that wins more matches than the other one.
+ * @param gameid 
+ */
 export const choseWinner: (gameid: string) => Promise<any> = async (gameid) => {
   let matchesStats = localGamesStats.get(gameid)
   if(matchesStats != undefined){
@@ -325,6 +342,7 @@ export const choseWinner: (gameid: string) => Promise<any> = async (gameid) => {
     });
     console.log("Match stats:", matchesStats)
     
+    // If this rule applies then the other user is the winner
     if(cnt < (matchesStats.length / 2)){
       let user2 = matchesStats.filter( e => e.winnerid != user)
       return user2[0].winnerid

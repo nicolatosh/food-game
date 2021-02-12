@@ -1,9 +1,15 @@
-import axios, { AxiosError } from 'axios';
+/**
+ * This controller manages user operations.
+ * Delegates the real "heavy" work to the user module.
+ * Here there is the logic to manage user related api calls.
+ */
+
 import { Request, Response } from 'express';
 import { signinUser, loginUser } from './user';
 
 /**
- * Perform the signin process
+ * Perform the signin process.
+ * Requires a JSON body with nickname and password.
  * @param req 
  * @param res 
  */
@@ -23,7 +29,8 @@ export const signin = async (req: Request, res: Response) => {
 };
 
 /**
- * Perform the login process
+ * Perform the login process.
+ * Requires a JSON body with nickname and password.
  * @param req 
  * @param res 
  */

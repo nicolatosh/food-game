@@ -21,8 +21,9 @@ export enum GAME_STATUS {
   Both_user_failure = "both_user_failure"
 }
 
-//Nummber of milliseconds. 5000 = 5 seconds
+// Number of milliseconds. 5000 = 5 seconds
 export const MATCH_DURATION: Number = 5000;
 
+// Number of matches in a single game
 export const MAX_MATCHES: Number = 3;
 

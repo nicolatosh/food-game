@@ -1,6 +1,6 @@
-/*********
- * Type definitions
- *   TypeScript interfaces and types should be defined here!
+/**
+ * Here there are some useful types used in the app.
+ * There is the definiton of Match, GameMatch etc.
  */
 
 import { GAME_STATUS } from "./game_types";

@@ -1,11 +1,13 @@
 import { AxiosError } from "axios";
-import { json } from "body-parser";
-import e from "express";
 import config from "../config";
 import { checkUserPassword, hashPassword } from "./utils.user";
 
 const axios = require('axios').default;
 
+/**
+ * This class models how the user is.
+ * It is a pair of nick and password.
+ */
 export class User {
     nickname: string;
     password: string;
@@ -18,6 +20,7 @@ export class User {
 
 /**
  * Allows to register a user given nickname and password
+ * Retruns boolean response
  * @param nickname 
  * @param password 
  */
@@ -28,7 +31,9 @@ export const signinUser: (nickname: string, password: string) => Promise<boolean
 }
 
 /**
- * Function to check if the nickname is already assigned to a user
+ * Function to check if the nickname is already assigned to a user.
+ * Performs a query to user db service.
+ * Returns boolean response.
  * @param nickname input as string
  */
 const isUserDuplicate: (nickname: string) => Promise<boolean> = async (nickname) =>{
@@ -43,9 +48,10 @@ const isUserDuplicate: (nickname: string) => Promise<boolean> = async (nickname)
 }
 
 /**
- * Register user into the User service database
- * @param nickanme 
- * @param password 
+ * Register user into the User service database. The password is hashed + salted.
+ * Returns a boolean response.
+ * @param nickanme nickname
+ * @param password password
  */
 const insertUser: (nickname:string, password: string) => Promise<boolean> = async (nickname,password) =>{
 
@@ -59,11 +65,13 @@ const insertUser: (nickname:string, password: string) => Promise<boolean> = asyn
 }
 
 /**
- * Returns a user taken from User service iff he's present in DB and credentials are correct
- * @param nickname 
- * @param password 
+ * Returns a user taken from User service iff he's present in DB and credentials are correct.
+ * Password is hashed and checked with the stored hased version in DB.
+ * This method returns a User {@see User} only nickname
+ * @param nickname nickname
+ * @param password password. Plain string password.
  */
-export const loginUser: (nickname:string, password: string) => Promise<User | AxiosError> = async (nickname,password) =>{
+export const loginUser: (nickname:string, password: string) => Promise<String> = async (nickname,password) =>{
 
     try {
         let user = await axios.get(`${config.USER_SERVICE_URL}/user?nickname=${nickname}`);

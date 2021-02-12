@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 
 /**
- * Simple async hashing function
+ * Simple async hashing + salting function
  * @param password string clear text
  */
 export const hashPassword: (password: string) => Promise<string> = async (password) => {
