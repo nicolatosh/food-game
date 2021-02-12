@@ -12,7 +12,6 @@ client = MongoClient('recipes_db', 27017)
 db = client.recipes_db
 collection = db.recipes
 
-#TODO fix recipes duplicates
 # This is how a recipe looks like. It is used for validation
 recipeSchema = {
     "title": "Recipe",
@@ -35,6 +34,27 @@ recipeSchema = {
     },
     "required": ["name"]
 }
+
+
+# Utility to create an unique digest which will be used as recipe id if not present
+def digest(recipe):
+    if recipe['_id'] is None:
+        _id = hash(recipe['name'] + recipe['ingredients'][0])
+        recipe['_id'] = _id
+        return recipe
+    return recipe
+
+
+# At this point there is a check if the Db is empty, in case a default collection will be loaded
+x = collection.find_one()
+if x is None:
+    print("Initializing default collection...")
+    f = open('default-collection.json')
+    data = json.load(f)
+    for recipe in data:
+        elem = digest(recipe)
+        collection.insert_one(elem)
+    f.close()
 
 
 # Helper function to validate recipes according to a recipeSchema
@@ -67,17 +87,25 @@ def info():
     return response
 
 
-# Post Json with recipe data
-@app.route('/addrecipe', methods=['POST'])
+# Post a single Json with recipe data
+@app.route('/recipe', methods=['POST'])
 def add_recipe():
-    print("Post received")
+    print("POST received: /recipe")
     req_data = request.get_json()
     if validate_json(req_data):
+        # Creating an unique id
+        req_data = digest(req_data)
         result = collection.insert_one(req_data)
         print(result)
-        return "200"
+        response = make_response({'recipe': req_data['name']})
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 200
+        return response
     else:
-        return "400"
+        response = make_response({'error': 'supplied not valid recipe'})
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 400
+        return response
 
 
 # Endpoint to get all recipes at '/recipes' Get method
@@ -85,14 +113,17 @@ def add_recipe():
 def get_recipes():
     res = collection.count_documents({})
     if res:
-        # returning recipes without "_id" generated from mongo
+        print("GET received: /recipes")
+        # returning recipes without "_id"
         coll = list(collection.find({}, {"_id": 0}))
-        for x in coll:
-            print(x)
         response = make_response(json.dumps(coll, default=str))
         response.headers['Content-Type'] = 'application/json'
         return response
-    return "404"
+    else:
+        response = make_response({'error': 'empty recipes collection'})
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 404
+        return response
 
 
 # Utility function to compute union without repetition
@@ -106,17 +137,22 @@ def union(lst1, lst2):
 def get_ingredients():
     res = collection.count_documents({})
     if res:
+        print("GET received: /ingredients")
         # returning ingredients from recipes
         coll = list(collection.find({}, {"_id": 0, "ingredients": 1}))
         res = []
         for x in coll:
             res = union(res, x['ingredients'])
-        print(res)
         response = make_response(json.dumps(res))
         response.headers['Content-Type'] = 'application/json'
+        response.status_code = 200
         return response
-    return "404"
+    else:
+        response = make_response({'error': 'empty ingredients collection'})
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 404
+        return response
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0',port=5000)
+    app.run(host='0.0.0.0', port=5000)
