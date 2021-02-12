@@ -1,5 +1,6 @@
-[
-  {
+{
+  "recipes": [
+    {
     "name": "Risotto ai funghi",
     "ingredients": [
       "riso",
@@ -15,8 +16,8 @@
       "aggiungi funghi",
       "manteca il tutto con burro e parmigiano"
     ]
-  },
-  {
+    },
+    {
     "name": "Pasta al pomodoro",
     "ingredients": [
       "pasta",
@@ -25,10 +26,10 @@
     "steps": [
       "cuoci la pasta",
       "cuoci il pomodoro",
-      "manteca il tutto",
+      "manteca il tutto"
     ]
-  },
-  {
+    },
+    {
     "name": "Pasta alla carbonara",
     "ingredients": [
       "pasta",
@@ -43,8 +44,8 @@
       "cuoci la pasta",
       "manteca la pasta nella crema"
     ]
-  },
-  {
+    },
+    {
     "name": "Pizza margherita",
     "ingredients": [
       "farina",
@@ -61,8 +62,8 @@
       "fai riposare 12 ore",
       "condisci con pomodoro e cuoci"
     ]
-  },
-  {
+    },
+    {
     "name": "Pasta al pesto",
     "ingredients": [
       "pasta",
@@ -77,8 +78,8 @@
       "cuoci la pasta",
       "manteca il tutto"
     ]
-  },
-  {
+    },
+    {
     "name": "Ciambellone al cioccolato",
     "ingredients": [
       "farina",
@@ -96,5 +97,6 @@
       "unisci i due composti",
       "cuoci a 180 gradi in forno statico"
     ]
-  }
-]
+    }
+  ] 
+}

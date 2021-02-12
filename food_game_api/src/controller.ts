@@ -209,6 +209,12 @@ export const sse = async (req: Request, res: Response) => {
   Stream.on('matchexpired', function() {
     console.log("send event gamefailure")
     res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'matchexpired', 'data': {}}) + '\n\n');
- });
+  });
+
+  Stream.on('joinfailure', function() {
+    console.log("send event joinfailure")
+    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'joinfailure', 'data': {}}) + '\n\n');
+  });
+
 }
 

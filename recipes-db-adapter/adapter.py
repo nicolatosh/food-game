@@ -38,11 +38,12 @@ recipeSchema = {
 
 # Utility to create an unique digest which will be used as recipe id if not present
 def digest(recipe):
-    if recipe['_id'] is None:
-        _id = hash(recipe['name'] + recipe['ingredients'][0])
-        recipe['_id'] = _id
+    if '_id' in recipe:
         return recipe
-    return recipe
+    else:
+        _id = hash(recipe['name'] + recipe['ingredients'][0])
+        recipe['_id'] = str(_id)
+        return recipe
 
 
 # At this point there is a check if the Db is empty, in case a default collection will be loaded
@@ -51,7 +52,7 @@ if x is None:
     print("Initializing default collection...")
     f = open('default-collection.json')
     data = json.load(f)
-    for recipe in data:
+    for recipe in data['recipes']:
         elem = digest(recipe)
         collection.insert_one(elem)
     f.close()

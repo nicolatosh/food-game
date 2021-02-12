@@ -312,11 +312,16 @@ function startOpponentConnectionTimer(gameid: string): void{
   opponentConnectionTimers.set(gameid,timerid);
 }
 
+/**
+ * When it fires a join failure event is sent
+ * @param gameid 
+ */
 function opponentConnectionTimeout(gameid: string): void{
   const opponentTimer = opponentConnectionTimers.get(gameid);
   if(opponentTimer != null){
     clearTimeout(opponentTimer)
     opponentConnectionTimers.delete(gameid)
+    stream.emit('joinfailure')
   }
   console.log(`Multiplayer game: ${gameid} failed to start. Opponent missing`);
 }

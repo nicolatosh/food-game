@@ -33,9 +33,16 @@ export class WaitOpponentComponent implements OnInit, OnDestroy {
             this.router.navigateByUrl(returnUrl)
           })
           break;
-      
+        
+        case 'joinfailure':
+          console.log("Opponent join failure")
+          let returnUrl2 = '/'
+          this.zone.run(() => {
+            this.router.navigateByUrl(returnUrl2)
+          })
+          break;
+
         default:
-          console.log("DATA",data)
           break;
       }
     })

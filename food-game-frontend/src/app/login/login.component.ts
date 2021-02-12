@@ -15,6 +15,7 @@ export class LoginComponent implements OnInit {
   loginResponse: User = { nickname: "", password:"" }
   registerResponse: User = { nickname: "", password:"" }
   badCredentials: boolean = false;
+  badRegister: boolean = false;
   returnUrl: string = '';
   constructor(
     private service: LoginService,
@@ -37,8 +38,13 @@ export class LoginComponent implements OnInit {
       this.badCredentials = false;
       this.service.register(this.nickname, this.password)
       .subscribe((res:User) => {
-        this.registerResponse = res;
-        return this.registerResponse;
+        if(res.nickname != ""){
+          this.registerResponse = res;
+          return this.registerResponse;
+        }else{
+          this.badRegister = true;
+        }
+        return this.registerResponse
       });
     }else{
       this.badCredentials = true;

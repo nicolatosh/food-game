@@ -37,6 +37,13 @@ def validate_json(json_data, schema):
     return True
 
 
+# At this point there is a check if the Db is empty, in case a default user in added
+x = collection.find_one()
+if x is None:
+    print("Default user created")
+    collection.insert_one({'nickname' : 'user', 'password' : 'user'})
+
+
 # This route can be used to check if the adapter service is
 # working properly. It returns a Json response describing 
 # the connection with DB and its information
