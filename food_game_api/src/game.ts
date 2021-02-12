@@ -322,6 +322,7 @@ function opponentConnectionTimeout(gameid: string): void{
     clearTimeout(opponentTimer)
     opponentConnectionTimers.delete(gameid)
     stream.emit('joinfailure')
+    gameEnd(gameid)
   }
   console.log(`Multiplayer game: ${gameid} failed to start. Opponent missing`);
 }
