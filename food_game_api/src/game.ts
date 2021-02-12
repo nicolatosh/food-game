@@ -210,6 +210,7 @@ export const processInput: (gameid: string, answer: string[], userid: string) =>
                   let new_match = await getMatchFromService(actual_game.matches[0].match_type)
                     if(new_match){
                       games[games.indexOf(actual_game)].matches.push(new_match);
+                      games[games.indexOf(actual_game)].game_status = GAME_STATUS.Gaming;
                     }else{ return "Error getting match"; }
                     console.log("Started new match:", new_match);
                     //restarting timer for this new match

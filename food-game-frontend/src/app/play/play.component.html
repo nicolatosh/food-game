@@ -10,12 +10,12 @@
             <button type="submit" id="multi_btn" class="btn btn-primary" type="button"
                     (click)="multi()">Multiplayer</button>
             <div class="d-row align-items-center">
-                <form id="join_game_form">
-                    <div class="mb-3s">
+                <form id="join_game_form ustify-content-center">
+                    <div class="mb-3s ustify-content-center" >
                         <label for="game" class="form-label">Insert Game id</label>
                         <input [(ngModel)]="gameid" name="gameid" type="text" class="form-control" id="game" aria-describedby="game">
                     </div>
-                    <button type="submit" id="join_btn" class="btn btn-primary" type="button"
+                    <button id="join" type="submit" id="join_btn" class="btn btn-primary" type="button"
                         (click)="join()">Join game</button>
                 </form>
             </div>

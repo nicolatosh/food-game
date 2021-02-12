@@ -34,6 +34,7 @@ export class GameComponent implements OnInit, OnDestroy {
   answerArray: Array<String> = [];
   returnUrl: string = "";
   disabledButtons: Array<number> = []
+  observable: Subscription;
 
   constructor(
     private router: Router,
@@ -51,10 +52,13 @@ export class GameComponent implements OnInit, OnDestroy {
     }
     this.timerSubscription = new Subscription
     this.answerSent = false
+    this.observable = new Subscription
   }
 
   ngOnDestroy(): void {
     this.timerSubscription.unsubscribe()
+    this.observable.unsubscribe()
+    
   }
 
 
@@ -77,7 +81,7 @@ export class GameComponent implements OnInit, OnDestroy {
         "answer": []
       }
 
-      this.sse.returnAsObservable(environment.apiSse).subscribe((data:any) => {
+      this.observable = this.sse.returnAsObservable(environment.apiSse).subscribe((data:any) => {
         switch (data.event) {
           case 'nextmatch':
             console.log("Setting next match", data.data)

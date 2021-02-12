@@ -7,26 +7,22 @@ import { SseService } from './sse.service';
 })
 export class ServersseService {
 
-  private subj = new BehaviorSubject([]);
-  event!: EventSource;
+  constructor(private sse: SseService, private _zone: NgZone) {}
   
-  constructor(private sse: SseService) {
-    
-  }
-
-  returnAsObservable(source: string)
-  {
-    this.getSseEvent(source)
-    return this.subj.asObservable();
-  }
-
-  getSseEvent(source: string){
-   this.event = this.sse.getServerEvent(source)
-   let subject = this.subj;
-      this.event.onmessage=function(e)
-      {
-        console.log("Sse service received new event", JSON.parse(e.data))
-        subject.next(JSON.parse(e.data));
-      }
+  returnAsObservable(url: string): Observable<any> {
+    return Observable.create((observer: any) => {
+      const eventSource = this.sse.getServerEvent(url);
+      eventSource.onmessage = event => {
+        this._zone.run(() => {
+          console.log("Sse service received new event", JSON.parse(event.data))
+          observer.next(JSON.parse(event.data));
+        });
+      };
+      eventSource.onerror = error => {
+        this._zone.run(() => {
+          observer.error(error);
+        });
+      };
+    });
   }
 }

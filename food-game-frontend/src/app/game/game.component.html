@@ -5,7 +5,7 @@
         <h4>Nickname <span class="badge bg-secondary">{{usernick}}</span></h4>
         <div [ngSwitch]="matchtype">
             <h4 *ngSwitchCase="'rearrange_steps'" >Match type: <b>Order steps</b></h4>
-            <h4 *ngSwitchCase="'scrambled_ingredients'" >Match type: <b>Select correct ingredients</b></h4>
+            <h4 *ngSwitchCase="'select_ingredients'" >Match type: <b>Select correct ingredients</b></h4>
             <div *ngSwitchDefault>{{matchtype}}</div>
         </div>
     </div>

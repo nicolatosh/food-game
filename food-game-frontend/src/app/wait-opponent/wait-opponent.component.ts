@@ -43,6 +43,7 @@ export class WaitOpponentComponent implements OnInit, OnDestroy {
           break;
 
         default:
+          console.log()
           break;
       }
     })

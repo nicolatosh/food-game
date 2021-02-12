@@ -40,7 +40,6 @@ export const play = async (req: Request, res: Response) => {
  //Checks on parameters
   if ((gamemode == GAME_MODE.Single || gamemode == GAME_MODE.Multiplayer) 
       && (matchtype == MATCH_TYPES.Rearrange_steps || matchtype == MATCH_TYPES.Select_ingredients)) {
-    Stream.removeAllListeners('matchwin')
     res.send(game);
   } else {
     res.status(400);
@@ -95,21 +94,18 @@ export const processUserInput = async (req: Request, res: Response) => {
       case GAME_STATUS.Game_end:
         let winner = choseWinner(newGame.gameid)
         Stream.emit('gameend', {userid: await winner})
-        Stream.removeAllListeners('gameend')
         res.send(newGame)
         res.status(200)
         break
       
       case GAME_STATUS.Opponent_wrong_response:
         Stream.emit('wronganswer', {userid: userid})
-        Stream.removeAllListeners('wronganswer')
         res.send("Wrong answer")
         res.status(200)
         break
       
       case GAME_STATUS.Opponent_match_win:
         Stream.emit('matchwin', newGame)
-        Stream.removeAllListeners('matchwin')
         res.send(newGame)
         res.status(200)
         break
@@ -154,10 +150,10 @@ export const opponentJoin = async (req: Request, res: Response) => {
     if(await joined){
       Stream.emit('join', function(){
         Stream.emit('join', { 'msg' : 'joined'})
+        Stream.removeAllListeners('join')
       });
       res.status(200);
       res.send(joined);
-      Stream.removeAllListeners('join')
     }   
   }else{
     res.status(404);
