@@ -1,0 +1,100 @@
+[
+  {
+    "name": "Risotto ai funghi",
+    "ingredients": [
+      "riso",
+      "funghi",
+      "brodo",
+      "burro",
+      "formaggio"
+    ],
+    "steps": [
+      "prepara il brodo",
+      "tosta il riso",
+      "cuoci riso con brodo",
+      "aggiungi funghi",
+      "manteca il tutto con burro e parmigiano"
+    ]
+  },
+  {
+    "name": "Pasta al pomodoro",
+    "ingredients": [
+      "pasta",
+      "pomodoro"
+    ],
+    "steps": [
+      "cuoci la pasta",
+      "cuoci il pomodoro",
+      "manteca il tutto",
+    ]
+  },
+  {
+    "name": "Pasta alla carbonara",
+    "ingredients": [
+      "pasta",
+      "guanciale",
+      "pecorino romano",
+      "pepe",
+      "tuorli"
+    ],
+    "steps": [
+      "prepara la crema di uovo e formaggio",
+      "cuoci il guanciale",
+      "cuoci la pasta",
+      "manteca la pasta nella crema"
+    ]
+  },
+  {
+    "name": "Pizza margherita",
+    "ingredients": [
+      "farina",
+      "acqua",
+      "sale",
+      "lievito",
+      "olio",
+      "pomodoro"
+    ],
+    "steps": [
+      "sciogli lievito in acqua",
+      "impasta farina e acqua",
+      "aggiungi olio e sale",
+      "fai riposare 12 ore",
+      "condisci con pomodoro e cuoci"
+    ]
+  },
+  {
+    "name": "Pasta al pesto",
+    "ingredients": [
+      "pasta",
+      "basilico",
+      "sale",
+      "olio",
+      "pinoli"
+    ],
+    "steps": [
+      "schiaccia le foglie nel mortaio",
+      "aggiungi olio e pinoli",
+      "cuoci la pasta",
+      "manteca il tutto"
+    ]
+  },
+  {
+    "name": "Ciambellone al cioccolato",
+    "ingredients": [
+      "farina",
+      "uova",
+      "sale",
+      "zucchero",
+      "burro",
+      "cioccolato"
+    ],
+    "steps": [
+      "mescola zucchero e burro",
+      "aggiungi tuorli",
+      "aggiungi sale e cioccolato",
+      "monta gli albumi",
+      "unisci i due composti",
+      "cuoci a 180 gradi in forno statico"
+    ]
+  }
+]
