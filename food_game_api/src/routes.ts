@@ -14,9 +14,11 @@ import {
 } from './controller'
 import { login, signin } from './user_controller';
 
-
 const router = express.Router();
 
+/**
+ * Food-game API endpoints
+ */
 router.get('/', welcome); 
 router.post('/play', play)
 router.get('/game', getMatchstatus)

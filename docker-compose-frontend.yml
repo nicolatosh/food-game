@@ -8,7 +8,7 @@ services:
     ports: 
       - "30000:30000"
     environment: 
-      - BACKEND=172.20.1.5
+      - BACKEND=172.20.1.4
 
   food_frontend:
     build: 

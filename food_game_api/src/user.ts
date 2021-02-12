@@ -71,7 +71,7 @@ const insertUser: (nickname:string, password: string) => Promise<boolean> = asyn
  * @param nickname nickname
  * @param password password. Plain string password.
  */
-export const loginUser: (nickname:string, password: string) => Promise<String> = async (nickname,password) =>{
+export const loginUser: (nickname:string, password: string) => Promise<User> = async (nickname,password) =>{
 
     try {
         let user = await axios.get(`${config.USER_SERVICE_URL}/user?nickname=${nickname}`);
