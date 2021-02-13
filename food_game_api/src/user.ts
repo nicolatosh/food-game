@@ -84,8 +84,8 @@ export const loginUser: (nickname:string, password: string, logout: boolean) => 
       let match: boolean = await checkUserPassword(password,userdata['password']);
       if(match){
         //let's authorize the user
-        let auth = await axios.post(`${config.USER_SERVICE_URL}/authorize`, { 'nickname' : nickname});
-        if(auth['operation']){
+        let auth = await axios.post(`${config.USER_SERVICE_URL}/authorize`, { 'nickname' : nickname });
+        if(auth.data['operation']){
           return { "nickname" : userdata['nickname']}
         }else{
           return {"error": "authorization failure"}
@@ -99,7 +99,7 @@ export const loginUser: (nickname:string, password: string, logout: boolean) => 
   }else{
     //here we have to logout the user => remove authorization
     let log = await axios.post(`${config.USER_SERVICE_URL}/logout`, { 'nickname' : nickname});
-    if(log['operation']){
+    if(log.data['operation']){
       console.log("User " + nickname + " logout")
       return {"operation" : true}
     }else{

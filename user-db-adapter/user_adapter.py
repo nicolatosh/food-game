@@ -120,7 +120,7 @@ def logout():
     # Find user and remove the authorization
     result = list(collection.find({"nickname": nick}, {"_id": 0}))
     if len(result):
-        result['authorized'] = False
+        result[0]['authorized'] = False
         response = make_response({"operation": True})
         response.headers['Content-Type'] = 'application/json'
         response.status_code = 200
@@ -138,7 +138,7 @@ def auth():
     nick = req_data["nickname"]
     result = list(collection.find({"nickname": nick}, {"_id": 0}))
     if len(result):
-        result['authorized'] = True
+        result[0]['authorized'] = True
         response = make_response({"operation": True})
         response.headers['Content-Type'] = 'application/json'
         response.status_code = 200
@@ -147,6 +147,7 @@ def auth():
         response = make_response({"operation": False})
         response.headers['Content-Type'] = 'application/json'
         response.status_code = 400
+        return response
 
 # Function to check if a nickname already exist in DB
 def is_user_duplicate(nick):

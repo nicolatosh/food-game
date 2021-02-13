@@ -38,22 +38,19 @@ export class LoginService {
     }));
   }
 
-  logout(nickname: string): boolean{
+   logout(): Observable<boolean>{
     let user: User = JSON.parse(sessionStorage.getItem('user') || '{}')
-    if(user.nickname == nickname){
-      let res = this.http.post(environment.apiLogin, { "nickname": nickname, "password": user.password, 'logout': true}, this.httpOptions)
+      return this.http.post(environment.apiLogin, { "nickname": user.nickname, "password": user.password, 'logout': true}, this.httpOptions)
       .pipe(
         catchError(this.handleError),
         map((res:any) => {
           if(res['operation']){
-            sessionStorage.removeItem(nickname)
+            sessionStorage.removeItem('user')
             return true
           }
           return false
         }
-      ))
-    }
-    return false
+      ));
   }
 
   public get currentUserValue(): User {

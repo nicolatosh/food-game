@@ -82,14 +82,14 @@ export class PlayComponent implements OnInit {
   /**
    * Method triggered from HTML component. Allows user to logout.
    */
-  logout(){
-    let user = this.loginService.currentUserValue.nickname
-    let out = this.loginService.logout(user)
-    if(out){
-      this.router.navigateByUrl("/");
-    }else{
-      console.log("Logout error")
-    }
+   logout(){
+    this.loginService.logout().subscribe((res:boolean) =>{
+      if(res){
+        this.router.navigateByUrl("/");
+      }else{
+        console.log("Logout error")
+      }
+    })
   }
 
   /**

@@ -43,14 +43,14 @@ export const login = async (req: Request, res: Response) => {
     const logout = response_body['logout']
    
     //Checks on parameters
-     if ((nickname != null && nickname!= " ") && (password != null && password!= " ")){
-       if(logout){
-         res.send(await loginUser(nickname, password, true))
-       }else{
-        res.send(await loginUser(nickname, password, false));
-       }
-     } else {
-       res.status(400);
-       res.send({ error: 'Supplied bad credentials to login' });
-     }
+    if(logout){
+      res.send(await loginUser(nickname, password, true))
+    }else{
+      if ((nickname != null && nickname!= " ") && (password != null && password!= " ")){
+          res.send(await loginUser(nickname, password, false));
+      } else {
+        res.status(400);
+        res.send({ error: 'Supplied bad credentials to login' });
+      }
+    }
   };
