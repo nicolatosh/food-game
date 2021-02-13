@@ -67,21 +67,44 @@ const insertUser: (nickname:string, password: string) => Promise<boolean> = asyn
 /**
  * Returns a user taken from User service iff he's present in DB and credentials are correct.
  * Password is hashed and checked with the stored hased version in DB.
- * This method returns a User {@see User} only nickname
+ * This method returns a User {@see User} only nickname. It's also soted in db the auth token
+ * of user. Note that it is not required in Api calls. Server perform the check.
+ * Allows also to logout a user. Deletes also the auth token.
+ * 
  * @param nickname nickname
  * @param password password. Plain string password.
  */
-export const loginUser: (nickname:string, password: string) => Promise<User> = async (nickname,password) =>{
+export const loginUser: (nickname:string, password: string, logout: boolean) => Promise<User | Error> = async (nickname,password,logout) =>{
 
-    try {
-        let user = await axios.get(`${config.USER_SERVICE_URL}/user?nickname=${nickname}`);
-        //comparing clear password with hashed one
-        let userdata = user.data[0]
-        let match: boolean = await checkUserPassword(password,userdata['password']);
-        if(match){
+  if(!logout){
+    try{
+      let user = await axios.get(`${config.USER_SERVICE_URL}/user?nickname=${nickname}`);
+      //comparing clear password with hashed one
+      let userdata = user.data[0]
+      let match: boolean = await checkUserPassword(password,userdata['password']);
+      if(match){
+        //let's authorize the user
+        let auth = await axios.post(`${config.USER_SERVICE_URL}/authorize`, { 'nickname' : nickname});
+        if(auth['operation']){
           return { "nickname" : userdata['nickname']}
+        }else{
+          return {"error": "authorization failure"}
         }
-      } catch (error) {
-        return error
+      }else{
+        return {"error": "wrong credentials"}
       }
+    } catch (error) {
+      return error
+    }  
+  }else{
+    //here we have to logout the user => remove authorization
+    let log = await axios.post(`${config.USER_SERVICE_URL}/logout`, { 'nickname' : nickname});
+    if(log['operation']){
+      console.log("User " + nickname + " logout")
+      return {"operation" : true}
+    }else{
+      return {"error": "logout failure"}
+    }
+  }
 }
+

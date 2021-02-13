@@ -31,6 +31,7 @@ export const signin = async (req: Request, res: Response) => {
 /**
  * Perform the login process.
  * Requires a JSON body with nickname and password.
+ * If user wants to logout also a 'logout' true param is needed.
  * @param req 
  * @param res 
  */
@@ -39,12 +40,16 @@ export const login = async (req: Request, res: Response) => {
     const response_body = req.body;
     const nickname = response_body['nickname'];
     const password = response_body['password'];
+    const logout = response_body['logout']
    
     //Checks on parameters
      if ((nickname != null && nickname!= " ") && (password != null && password!= " ")){
-       res.send(await loginUser(nickname,password));
+       if(logout){
+         res.send(await loginUser(nickname, password, true))
+       }else{
+        res.send(await loginUser(nickname, password, false));
+       }
      } else {
-       console.log("bad asdad")
        res.status(400);
        res.send({ error: 'Supplied bad credentials to login' });
      }

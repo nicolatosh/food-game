@@ -67,11 +67,10 @@ def info():
     return response
 
 
-# Endpoint that allows user to signing or to login.
-# In case of successful Post it returns the nick of user
-# In case of successful Get it returns the nick of user
+# Endpoint that allows to signin a user (POST nick + password)
+# If user is in Db then the GET response is the user
 @app.route('/user', methods=['POST', 'GET'])
-def add_recipe():
+def get_user():
 
     # POST allows to add a user 
     if request.method == 'POST':
@@ -113,7 +112,41 @@ def add_recipe():
         response.status_code = 400
         return response
         
+# Endpoint that allows user to logout
+@app.route('/logout', methods=['POST'])
+def logout():
+    req_data = request.get_json()
+    nick = req_data["nickname"]
+    # Find user and remove the authorization
+    result = list(collection.find({"nickname": nick}, {"_id": 0}))
+    if len(result):
+        result['authorized'] = False
+        response = make_response({"operation": True})
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 200
+        return response
+    else:
+        response = make_response({"operation": False})
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 400
+    
 
+# Endpoint that allows to authorize a user
+@app.route('/authorize', methods=['POST'])
+def auth():
+    req_data = request.get_json()
+    nick = req_data["nickname"]
+    result = list(collection.find({"nickname": nick}, {"_id": 0}))
+    if len(result):
+        result['authorized'] = True
+        response = make_response({"operation": True})
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 200
+        return response
+    else:
+        response = make_response({"operation": False})
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 400
 
 # Function to check if a nickname already exist in DB
 def is_user_duplicate(nick):

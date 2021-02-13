@@ -38,6 +38,24 @@ export class LoginService {
     }));
   }
 
+  logout(nickname: string): boolean{
+    let user: User = JSON.parse(sessionStorage.getItem('user') || '{}')
+    if(user.nickname == nickname){
+      let res = this.http.post(environment.apiLogin, { "nickname": nickname, "password": user.password, 'logout': true}, this.httpOptions)
+      .pipe(
+        catchError(this.handleError),
+        map((res:any) => {
+          if(res['operation']){
+            sessionStorage.removeItem(nickname)
+            return true
+          }
+          return false
+        }
+      ))
+    }
+    return false
+  }
+
   public get currentUserValue(): User {
     console.log("CURRENT USER ", this.currentUserSubject.value)
     return this.currentUserSubject.value

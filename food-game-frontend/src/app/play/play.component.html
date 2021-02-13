@@ -10,8 +10,8 @@
             <button type="submit" id="multi_btn" class="btn btn-primary" type="button"
                     (click)="multi()">Multiplayer</button>
             <div class="d-row align-items-center">
-                <form id="join_game_form ustify-content-center">
-                    <div class="mb-3s ustify-content-center" >
+                <form id="join_game_form justify-content-center">
+                    <div class="mb-3s justify-content-center" >
                         <label for="game" class="form-label">Insert Game id</label>
                         <input [(ngModel)]="gameid" name="gameid" type="text" class="form-control" id="game" aria-describedby="game">
                     </div>
@@ -23,6 +23,9 @@
         </div>
     </div>
 </div>
+
+<button type="submit" id="logout" class="btn btn-primary" type="button"
+                    (click)="logout()">Logout</button>
 
 <div *ngIf="modeSelected == true">
     <div class="row align-items-center">
