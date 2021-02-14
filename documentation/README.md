@@ -59,6 +59,8 @@ sudo docker-compose -f docker-compose-frontend up --build
 
 
 >**Note**: we can also avoid to use pre-configured VMs with shared network. The only parameter to change is *BACKEND* env variable in *docker-compose-frontend.yml* file in which we need to specify what is the other machine address. Services will make calls at such address.
+So before starting make sure that BACKEND env variable is equal to *enp0s3* adress of the VM that runs the backend stack.
+
 
 Game is now accessible via front-end at **http://localhost:4200/**
 

@@ -84,7 +84,7 @@ export class LoginComponent implements OnInit {
   
   isLogged(): User | false {
     let user: User = JSON.parse(sessionStorage.getItem('user') || '{}')
-    if(user.nickname != undefined){
+    if(user.nickname != undefined && user.nickname != '{}'){
       return user
     }
     return false

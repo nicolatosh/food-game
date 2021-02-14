@@ -8,7 +8,7 @@ This is a simple "view" of the food-api. It allows to play a game with through a
 
 
 
-![image-20210214112245083](img/home.png)
+![image-20210214112245083](./img/home.png)
 
 > Default user is:
 >
