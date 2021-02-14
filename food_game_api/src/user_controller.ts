@@ -64,7 +64,7 @@ export const login = async (req: Request, res: Response) => {
 export const logger = async (req: Request, res: Response, next:Function) =>{
   const response_body = req.body;
   const nickname = response_body['nickname'];
-  if(!checkAuth(nickname)){
+  if((nickname == undefined) || (!checkAuth(nickname))){
     res.status(400);
     res.send({ 'error': 'not authorized' });
   }else{
