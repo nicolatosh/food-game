@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import { buildGame, processInput, opponentJoinGame, getMatchTypes, choseWinner } from './game';
 import { GAME_MODE, GAME_STATUS, MATCH_TYPES } from './game_types';
-import { GameMatch } from './types';
 import { checkGameActive } from './utils';
 
-const Stream = require('central-event')
+const stream = require('central-event')
 
 /**
  * Endpoint to check if the service is online.
@@ -86,33 +85,33 @@ export const processUserInput = async (req: Request, res: Response) => {
   if(await game != false){
     switch (newGame.game_status) {
       case GAME_STATUS.Gaming:
-        Stream.emit('nextmatch', newGame)
+        stream.emit('nextmatch', newGame)
         res.send(newGame)
         res.status(200)
         break
       
       case GAME_STATUS.Game_end:
         let winner = choseWinner(newGame.gameid)
-        Stream.emit('gameend', {userid: await winner})
+        stream.emit('gameend', {userid: await winner})
         res.send(newGame)
         res.status(200)
         break
       
       case GAME_STATUS.Opponent_wrong_response:
-        Stream.emit('wronganswer', {userid: userid})
+        stream.emit('wronganswer', {userid: userid})
         res.send("Wrong answer")
         res.status(200)
         break
       
       case GAME_STATUS.Opponent_match_win:
-        Stream.emit('matchwin', newGame)
+        stream.emit('matchwin', newGame)
         res.send(newGame)
         res.status(200)
         break
 
       case GAME_STATUS.Both_user_failure:
-        Stream.emit('gamefailure')
-        Stream.removeAllListeners('gamefailure')
+        stream.emit('gamefailure')
+        stream.removeAllListeners('gamefailure')
         res.send("Game failure")
         res.status(200)
         break
@@ -148,9 +147,9 @@ export const opponentJoin = async (req: Request, res: Response) => {
     })
 
     if(await joined){
-      Stream.emit('join', function(){
-        Stream.emit('join', { 'msg' : 'joined'})
-        Stream.removeAllListeners('join')
+      stream.emit('join', function(){
+        stream.emit('join', { 'msg' : 'joined'})
+        stream.removeAllListeners('join')
       });
       res.status(200);
       res.send(joined);
@@ -164,53 +163,3 @@ export const opponentJoin = async (req: Request, res: Response) => {
 export const matchtypes = async (req: Request, res: Response) => {
   res.send(await getMatchTypes());
 }
-
-export const sse = async (req: Request, res: Response) => {
-  res.writeHead(200,{
-    'Content-type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    Connection: 'keep-alive'
-  });
-
-  Stream.on('join', function(){
-    console.log("send event join")
-    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'join', 'data': ""}) + '\n\n');
-  });
-
-  Stream.on('nextmatch', (data:GameMatch) =>{
-    console.log("send event nextmatch")
-    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'nextmatch', 'data': data}) + '\n\n');
-  });
-
-  Stream.on('wronganswer', (data:GameMatch) =>{
-    console.log("send event wronganswer")
-    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'wronganswer', 'data': data}) + '\n\n');
-  });
-
-  Stream.on('matchwin', (data:GameMatch) =>{
-    console.log("send event matchwin")
-    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'matchwin', 'data': data}) + '\n\n');
-  });
-
-  Stream.on('gameend', (data:GameMatch) =>{
-    console.log("send event gameend")
-    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'gameend', 'data': data}) + '\n\n');
-  });
-
-  Stream.on('gamefailure', function() {
-    console.log("send event gamefailure")
-    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'gamefailure', 'data': {}}) + '\n\n');
-  });
-
-  Stream.on('matchexpired', function() {
-    console.log("send event gamefailure")
-    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'matchexpired', 'data': {}}) + '\n\n');
-  });
-
-  Stream.on('joinfailure', function() {
-    console.log("send event joinfailure")
-    res.write('event: message' +'\n' + 'data: ' + JSON.stringify({'event': 'joinfailure', 'data': {}}) + '\n\n');
-  });
-
-}
-

@@ -9,9 +9,9 @@ import {
     getMatchstatus,
     processUserInput,
     opponentJoin,
-    matchtypes,
-    sse
+    matchtypes
 } from './controller'
+import { sse } from './sse_controller';
 import { login, signin, logger } from './user_controller';
 
 const router = express.Router();
