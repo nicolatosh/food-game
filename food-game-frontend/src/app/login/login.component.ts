@@ -44,7 +44,7 @@ export class LoginComponent implements OnInit {
           this.registredok = true;
           return this.registerResponse;
         }else{
-          this.badRegiser = true;
+          this.badRegister = true;
         }
         return this.registerResponse
       });
@@ -55,7 +55,7 @@ export class LoginComponent implements OnInit {
   
   login() {
     this.registredok = false
-    this.badRegiser = false
+    this.badRegister = false
     if(this.checkCredentials()){
       this.badCredentials = false;
         this.service.login(this.nickname, this.password)
