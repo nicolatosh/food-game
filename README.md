@@ -47,6 +47,7 @@ In machine named "Ubuntu"
 > VMs password = nicola
 
 ```
+git clone https://ArpiNatoR@bitbucket.org/ArpiNatoR/sde.git
 cd sde
 sudo docker-compose -f docker-compose-backend up --build
 ```
@@ -54,6 +55,7 @@ sudo docker-compose -f docker-compose-backend up --build
 In machine named "Ubuntu-frontend"
 
 ```
+git clone https://ArpiNatoR@bitbucket.org/ArpiNatoR/sde.git
 cd sde
 sudo docker-compose -f docker-compose-frontend up --build
 ```
