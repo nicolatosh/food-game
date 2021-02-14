@@ -15,7 +15,7 @@ export class LoginComponent implements OnInit {
   loginResponse: User = { nickname: "", password:"" }
   registerResponse: User = { nickname: "", password:"" }
   badCredentials: boolean = false;
-  registred: boolean = false;
+  registredok: boolean = false;
   badRegiser: boolean = false;
   returnUrl: string = '';
   constructor(
@@ -41,7 +41,7 @@ export class LoginComponent implements OnInit {
       .subscribe((res:User) => {
         if(res.nickname != ""){
           this.registerResponse = res;
-          this.registred = true;
+          this.registredok = true;
           return this.registerResponse;
         }else{
           this.badRegiser = true;
@@ -54,7 +54,7 @@ export class LoginComponent implements OnInit {
   }
   
   login() {
-    this.registred = false
+    this.registredok = false
     this.badRegiser = false
     if(this.checkCredentials()){
       this.badCredentials = false;

@@ -13,18 +13,18 @@ h3 {
     font-weight: bolder;
 }
 
-#registred {
+#registredBox {
     text-align: center;
     margin-top: 10%;
-    color: green;
+    color: red;
     font-size: x-large;
     font-weight: bolder;
 }
 
-#registredFail{
+#registredOkBox {
     text-align: center;
     margin-top: 10%;
-    color: red;
+    color: green;
     font-size: x-large;
     font-weight: bolder;
 }
