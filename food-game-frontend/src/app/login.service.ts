@@ -20,7 +20,7 @@ export class LoginService {
     })
   };
   constructor(private http: HttpClient) { 
-    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(sessionStorage.getItem('user') || '{}'));
+    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(sessionStorage.getItem('user') || ''));
     this.currentUser = this.currentUserSubject.asObservable();
   }
 

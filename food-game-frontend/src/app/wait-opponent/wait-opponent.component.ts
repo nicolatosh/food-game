@@ -16,7 +16,7 @@ export class WaitOpponentComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router, private sse: ServersseService, private zone: NgZone) {
     let navigation = this.router.getCurrentNavigation()
-    if(navigation){
+    if (navigation) {
       this.newUrl = navigation.extras.state as {
         gamemode: string,
         matchtype: string,
@@ -24,7 +24,8 @@ export class WaitOpponentComponent implements OnInit, OnDestroy {
         user: string
       }
     }
-    this.observable = this.sse.returnAsObservable(environment.apiSse).subscribe((data:any) => {
+    // SSE event management
+    this.observable = this.sse.returnAsObservable(environment.apiSse).subscribe((data: any) => {
       switch (data.event) {
         case 'join':
           console.log("Opponent joined!")
@@ -33,7 +34,7 @@ export class WaitOpponentComponent implements OnInit, OnDestroy {
             this.router.navigateByUrl(returnUrl)
           })
           break;
-        
+
         case 'joinfailure':
           console.log("Opponent join failure")
           let returnUrl2 = '/'
@@ -52,6 +53,6 @@ export class WaitOpponentComponent implements OnInit, OnDestroy {
     this.observable.unsubscribe()
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
 }

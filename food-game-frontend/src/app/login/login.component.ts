@@ -15,7 +15,8 @@ export class LoginComponent implements OnInit {
   loginResponse: User = { nickname: "", password:"" }
   registerResponse: User = { nickname: "", password:"" }
   badCredentials: boolean = false;
-  badRegister: boolean = false;
+  registred: boolean = false;
+  badRegiser: boolean = false;
   returnUrl: string = '';
   constructor(
     private service: LoginService,
@@ -40,9 +41,10 @@ export class LoginComponent implements OnInit {
       .subscribe((res:User) => {
         if(res.nickname != ""){
           this.registerResponse = res;
+          this.registred = true;
           return this.registerResponse;
         }else{
-          this.badRegister = true;
+          this.badRegiser = true;
         }
         return this.registerResponse
       });
@@ -52,6 +54,8 @@ export class LoginComponent implements OnInit {
   }
   
   login() {
+    this.registred = false
+    this.badRegiser = false
     if(this.checkCredentials()){
       this.badCredentials = false;
         this.service.login(this.nickname, this.password)
@@ -83,8 +87,8 @@ export class LoginComponent implements OnInit {
   }
   
   isLogged(): User | false {
-    let user: User = JSON.parse(sessionStorage.getItem('user') || '{}')
-    if(user.nickname != undefined && user.nickname != '{}'){
+    let user: User = JSON.parse(sessionStorage.getItem('user') || '')
+    if(user.nickname != undefined && user.nickname != ''){
       return user
     }
     return false

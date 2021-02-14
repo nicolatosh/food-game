@@ -12,8 +12,7 @@ export class GameendComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute
-  ) 
-  {
+  ) {
   }
 
   ngOnInit(): void {
@@ -22,9 +21,9 @@ export class GameendComponent implements OnInit {
         this.isGameOver = params['result']
       });
 
-      setTimeout(() => {
-        this.router.navigateByUrl("/");
-    }, 5000);  
+    setTimeout(() => {
+      this.router.navigateByUrl("/");
+    }, 5000);
   }
 
 }

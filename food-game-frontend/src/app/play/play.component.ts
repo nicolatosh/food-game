@@ -26,34 +26,35 @@ export class PlayComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private gameService: GameService
-  ) { this.modeSelected = false; 
-      this.navigationExtras = {
-        state: {
-          gamemode: "",
-          matchtype: "",
-          gameid: "",
-          user: ""
-        }
+  ) {
+    this.modeSelected = false;
+    this.navigationExtras = {
+      state: {
+        gamemode: "",
+        matchtype: "",
+        gameid: "",
+        user: ""
       }
     }
+  }
 
   ngOnInit(): void {
     this.availableMatches = this.service.getMatchesType()
       .subscribe(matches => {
-        if(matches){
+        if (matches) {
           this.availableMatches = matches
-        }else{
+        } else {
           console.log("Error in getting matches type")
         }
       });
   }
 
-  single(){
+  single() {
     this.modeSelected = true;
     this.gamemode = Modalities.SINGLE;
   }
 
-  multi(){
+  multi() {
     this.modeSelected = true;
     this.gamemode = Modalities.MULTI;
   }
@@ -62,31 +63,31 @@ export class PlayComponent implements OnInit {
    * Method triggered from HTLM component page when button JOIN game is clicked.
    * The gameId paramerter is binded to html input form
    */
-  join(){
+  join() {
     this.service.joinGame(this.gameid)
-    .subscribe((game:GameMatch) => {
-      if(game != null){
-        console.log("Game join: ", game)
-        let gameid = game["gameid"]
-        this.gameService.setGame(game)
-        this.returnUrl = `game/${game.gamemode}/${game.matches[0].match_type}/${gameid}/${this.loginService.currentUserValue.nickname}`
-        console.log("Nvaigatin to", this.returnUrl)
-        this.router.navigateByUrl(this.returnUrl);
-      }else{
-        console.log("Error in join. Game null")
-      }
-    });
+      .subscribe((game: GameMatch) => {
+        if (game != null) {
+          console.log("Game join: ", game)
+          let gameid = game["gameid"]
+          this.gameService.setGame(game)
+          this.returnUrl = `game/${game.gamemode}/${game.matches[0].match_type}/${gameid}/${this.loginService.currentUserValue.nickname}`
+          console.log("Nvaigatin to", this.returnUrl)
+          this.router.navigateByUrl(this.returnUrl);
+        } else {
+          console.log("Error in join. Game null")
+        }
+      });
   }
 
 
   /**
    * Method triggered from HTML component. Allows user to logout.
    */
-   logout(){
-    this.loginService.logout().subscribe((res:boolean) =>{
-      if(res){
+  logout() {
+    this.loginService.logout().subscribe((res: boolean) => {
+      if (res) {
         this.router.navigateByUrl("/");
-      }else{
+      } else {
         console.log("Logout error")
       }
     })
@@ -97,27 +98,27 @@ export class PlayComponent implements OnInit {
    * buttons to choose a gamemode (Single or Multi)
    * @param match 
    */
-  play(match:string){
+  play(match: string) {
     this.matchtype = match;
     switch (this.gamemode) {
       case Modalities.SINGLE:
-        this.service.initGame(this.gamemode,this.matchtype)
-          .subscribe((game:GameMatch) => {
-            if(game != null){
+        this.service.initGame(this.gamemode, this.matchtype)
+          .subscribe((game: GameMatch) => {
+            if (game != null) {
               let gameid = game["gameid"]
               this.gameService.setGame(game)
               this.returnUrl = `/game/${this.gamemode}/${this.matchtype}/${gameid}/${this.loginService.currentUserValue.nickname}`
               this.router.navigateByUrl(this.returnUrl);
-            }else{
+            } else {
               //error
             }
           });
         break;
-      
+
       case Modalities.MULTI:
-        this.service.initGame(this.gamemode,this.matchtype)
-          .subscribe((game:GameMatch) => {
-            if(game){
+        this.service.initGame(this.gamemode, this.matchtype)
+          .subscribe((game: GameMatch) => {
+            if (game) {
               let gameid = game["gameid"]
               this.gameService.setGame(game)
               this.navigationExtras = {
@@ -130,8 +131,8 @@ export class PlayComponent implements OnInit {
               }
               this.returnUrl = `/game/wait`
               this.router.navigate(['/game/wait'], this.navigationExtras);
-            }else{
-              //error
+            } else {
+              console.log("Error from backend: ", game)
             }
           });
 
