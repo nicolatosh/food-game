@@ -108,7 +108,24 @@ def add_recipe():
         response.status_code = 400
         return response
 
-
+# Delete a recipe by name
+@app.route('/recipe', methods=['DELETE'])
+def delete_recipe():
+    print("DELETE received: /recipe")
+    req_data = request.args.get('name')
+    coll = list(collection.find({}, {"_id": 0, "name" : req_data}))
+    if len(coll) > 0:
+        collection.delete_one({ "name" : req_data})
+        response = make_response({'recipe': req_data['name']})
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 200
+        return response
+    else:
+        response = make_response({'error': 'supplied not valid recipe'})
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 400
+        return response
+        
 # Endpoint to get all recipes at '/recipes' Get method
 @app.route('/recipes', methods=['GET'])
 def get_recipes():
