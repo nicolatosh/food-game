@@ -19,13 +19,13 @@ const routes: Routes = [
     path: 'play/:usernick', component: PlayComponent, canActivate: [AccessGuard]
   },
   {
-    path: 'game/wait', component: WaitOpponentComponent
+    path: 'game/wait', component: WaitOpponentComponent, canActivate: [AccessGuard]
   },
   {
-    path : 'game/:gamemode/:matchtype/:gameid/:usernick' , component: GameComponent
+    path : 'game/:gamemode/:matchtype/:gameid/:usernick' , component: GameComponent, canActivate: [AccessGuard]
   },
   {
-    path : 'game/:result', component: GameendComponent
+    path : 'game/:result', component: GameendComponent, canActivate: [AccessGuard]
   }
 ];
 

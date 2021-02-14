@@ -5,7 +5,7 @@
  */
 
 import { Request, Response } from 'express';
-import { signinUser, loginUser } from './user';
+import { signinUser, loginUser, checkAuth } from './user';
 
 /**
  * Perform the signin process.
@@ -50,7 +50,24 @@ export const login = async (req: Request, res: Response) => {
           res.send(await loginUser(nickname, password, false));
       } else {
         res.status(400);
-        res.send({ error: 'Supplied bad credentials to login' });
+        res.send({ 'error': 'Supplied bad credentials to login' });
       }
     }
   };
+
+/**
+ * Middleware to be used to check whether the user is authenticated
+ * @param req 
+ * @param res 
+ * @param next 
+ */
+export const logger = async (req: Request, res: Response, next:Function) =>{
+  const response_body = req.body;
+  const nickname = response_body['nickname'];
+  if(!checkAuth(nickname)){
+    res.status(400);
+    res.send({ 'error': 'not authorized' });
+  }else{
+    next();
+  }
+}

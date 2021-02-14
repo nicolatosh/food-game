@@ -129,6 +129,7 @@ def logout():
         response = make_response({"operation": False})
         response.headers['Content-Type'] = 'application/json'
         response.status_code = 400
+        return response
     
 
 # Endpoint that allows to authorize a user

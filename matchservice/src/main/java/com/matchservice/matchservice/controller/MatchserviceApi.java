@@ -33,13 +33,10 @@ public class MatchserviceApi {
         JSONObject header;
         String body;
         JSONObject response;
-
         List<Recipe> recipes = recipeService.getRecipes();
         Random rand = new Random();
         var selectedRecipe = recipes.get(rand.nextInt(recipes.size()));
         var scrambledSteps = Utils.scramble(selectedRecipe.getSteps());
-
-        //TODO scramble ingredients = recipe ingredients - few of them replaced with someother ones different than actual ones
         var ingredientsPool = recipeService.getIngredients();
         var recipeIngredients = selectedRecipe.getIngredients();
         var scrambledIngredients = Utils.scrambleDoubleSource(recipeIngredients, ingredientsPool);
@@ -82,18 +79,5 @@ public class MatchserviceApi {
                         .body("Error, such type of match does not exits");
 
         }
-
-//        header = new JSONObject()
-//                .put("status", "ok")
-//                .put("status_code", HttpStatus.OK.value())
-//                .put("description", "votes retrieved");
-//        body = new JSONArray();
-//        response = new JSONObject()
-//                .put("header", header)
-//                .put("body", response);
-//        return ResponseEntity
-//                .ok()
-//                .body(response.toString());
-//    }
     }
 }

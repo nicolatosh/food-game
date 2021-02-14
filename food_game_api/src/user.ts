@@ -9,13 +9,13 @@ const axios = require('axios').default;
  * It is a pair of nick and password.
  */
 export class User {
-    nickname: string;
-    password: string;
+  nickname: string;
+  password: string;
 
-    constructor(nick: string, password: string){
-        this.nickname = nick;
-        this.password = password;
-    }
+  constructor(nick: string, password: string) {
+    this.nickname = nick;
+    this.password = password;
+  }
 }
 
 /**
@@ -26,7 +26,7 @@ export class User {
  */
 export const signinUser: (nickname: string, password: string) => Promise<boolean> = async (nickname, password) => {
 
-  let res = await insertUser(nickname,password)
+  let res = await insertUser(nickname, password)
   return res
 }
 
@@ -36,15 +36,15 @@ export const signinUser: (nickname: string, password: string) => Promise<boolean
  * Returns boolean response.
  * @param nickname input as string
  */
-const isUserDuplicate: (nickname: string) => Promise<boolean> = async (nickname) =>{
+const isUserDuplicate: (nickname: string) => Promise<boolean> = async (nickname) => {
 
-    try {
-        let user = await axios.get(`${config.USER_SERVICE_URL}/user=${nickname}`);
-        return user;
-      } catch (error) {
-        console.log(error);
-        return error
-      }
+  try {
+    let user = await axios.get(`${config.USER_SERVICE_URL}/user=${nickname}`);
+    return user;
+  } catch (error) {
+    console.log(error);
+    return error
+  }
 }
 
 /**
@@ -53,15 +53,15 @@ const isUserDuplicate: (nickname: string) => Promise<boolean> = async (nickname)
  * @param nickanme nickname
  * @param password password
  */
-const insertUser: (nickname:string, password: string) => Promise<boolean> = async (nickname,password) =>{
+const insertUser: (nickname: string, password: string) => Promise<boolean> = async (nickname, password) => {
 
-    let user = { 'nickname': nickname, 'password': await hashPassword(password) };
-    try {
-        let response = await axios.post(`${config.USER_SERVICE_URL}/user`, user);
-        return response.data
-      } catch (error) {
-        return error
-      }
+  let user = { 'nickname': nickname, 'password': await hashPassword(password) };
+  try {
+    let response = await axios.post(`${config.USER_SERVICE_URL}/user`, user);
+    return response.data
+  } catch (error) {
+    return error
+  }
 }
 
 /**
@@ -74,37 +74,59 @@ const insertUser: (nickname:string, password: string) => Promise<boolean> = asyn
  * @param nickname nickname
  * @param password password. Plain string password.
  */
-export const loginUser: (nickname:string, password: string, logout: boolean) => Promise<User | Error> = async (nickname,password,logout) =>{
+export const loginUser: (nickname: string, password: string, logout: boolean) => Promise<User | Error> = async (nickname, password, logout) => {
 
-  if(!logout){
-    try{
+  if (!logout) {
+    try {
       let user = await axios.get(`${config.USER_SERVICE_URL}/user?nickname=${nickname}`);
       //comparing clear password with hashed one
       let userdata = user.data[0]
-      let match: boolean = await checkUserPassword(password,userdata['password']);
-      if(match){
+      let match: boolean = await checkUserPassword(password, userdata['password']);
+      if (match) {
         //let's authorize the user
-        let auth = await axios.post(`${config.USER_SERVICE_URL}/authorize`, { 'nickname' : nickname });
-        if(auth.data['operation']){
-          return { "nickname" : userdata['nickname']}
-        }else{
-          return {"error": "authorization failure"}
+        let auth = await axios.post(`${config.USER_SERVICE_URL}/authorize`, { 'nickname': nickname });
+        if (auth.data['operation']) {
+          return { "nickname": userdata['nickname'] }
+        } else {
+          return { "error": "authorization failure" }
         }
-      }else{
-        return {"error": "wrong credentials"}
+      } else {
+        return { "error": "wrong credentials" }
       }
     } catch (error) {
       return error
-    }  
-  }else{
+    }
+  } else {
     //here we have to logout the user => remove authorization
-    let log = await axios.post(`${config.USER_SERVICE_URL}/logout`, { 'nickname' : nickname});
-    if(log.data['operation']){
+    let log = await axios.post(`${config.USER_SERVICE_URL}/logout`, { 'nickname': nickname });
+    if (log.data['operation']) {
       console.log("User " + nickname + " logout")
-      return {"operation" : true}
-    }else{
-      return {"error": "logout failure"}
+      return { "operation": true }
+    } else {
+      return { "error": "logout failure" }
     }
   }
 }
+
+/**
+ * Function to check if user is authorized
+ * @param nickname 
+ */
+export const checkAuth: (nickname: string) => Promise<boolean> = async (nickname) => {
+
+  try {
+    let user = await axios.get(`${config.USER_SERVICE_URL}/user?nickname=${nickname}`);
+
+    //checking auth attribute
+    let userdata = user.data[0]
+    let auth = userdata['authorized']
+    return auth
+  } catch (error) {
+    return error
+  }
+}
+
+
+
+
 

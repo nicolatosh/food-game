@@ -12,18 +12,19 @@ import {
     matchtypes,
     sse
 } from './controller'
-import { login, signin } from './user_controller';
+import { login, signin, logger } from './user_controller';
 
 const router = express.Router();
 
 /**
- * Food-game API endpoints
+ * Food-game API endpoints. Note that some of them require
+ * authentication.
  */
 router.get('/', welcome); 
 router.post('/play', play)
-router.get('/game', getMatchstatus)
-router.post('/game', processUserInput)
-router.post('/game/join', opponentJoin)
+router.get('/game', logger, getMatchstatus)
+router.post('/game', logger, processUserInput)
+router.post('/game/join', logger, opponentJoin)
 router.post('/register',signin)
 router.post('/login',login)
 router.get('/matchtypes', matchtypes)

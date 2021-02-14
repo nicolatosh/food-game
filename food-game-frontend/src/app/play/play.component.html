@@ -4,37 +4,34 @@
     </div>
     <div class="container">
         <div class="col align-items-center">
-        <div class="d-flex flex-column justify-content-center">
-            <button type="submit" id="single_btn" class="btn btn-primary" type="button"
+            <div class="d-flex flex-column justify-content-center">
+                <button type="submit" id="single_btn" class="btn btn-primary" type="button"
                     (click)="single()">Singleplayer</button>
-            <button type="submit" id="multi_btn" class="btn btn-primary" type="button"
+                <button type="submit" id="multi_btn" class="btn btn-primary" type="button"
                     (click)="multi()">Multiplayer</button>
-            <div class="d-row align-items-center">
-                <form id="join_game_form justify-content-center">
-                    <div class="mb-3s justify-content-center" >
-                        <label for="game" class="form-label">Insert Game id</label>
-                        <input [(ngModel)]="gameid" name="gameid" type="text" class="form-control" id="game" aria-describedby="game">
-                    </div>
-                    <button id="join" type="submit" id="join_btn" class="btn btn-primary" type="button"
-                        (click)="join()">Join game</button>
-                </form>
+                <div class="d-row align-items-center">
+                    <form id="join_game_form justify-content-center">
+                        <div class="mb-3s justify-content-center">
+                            <label for="game" class="form-label">Insert Game id</label>
+                            <input [(ngModel)]="gameid" name="gameid" type="text" class="form-control" id="game"
+                                aria-describedby="game">
+                        </div>
+                        <button id="join" type="submit" id="join_btn" class="btn btn-primary" type="button"
+                            (click)="join()">Join game</button>
+                    </form>
+                </div>
             </div>
-        </div>
+            <button type="submit" id="logout" class="btn btn-primary" type="button" (click)="logout()">Logout</button>
         </div>
     </div>
 </div>
-
-<button type="submit" id="logout" class="btn btn-primary" type="button"
-                    (click)="logout()">Logout</button>
-
 <div *ngIf="modeSelected == true">
     <div class="row align-items-center">
         <h3>Select match mode</h3>
     </div>
     <div class="d-flex flex-column justify-content-center">
         <div class="d-flex flex-column" *ngFor="let match of availableMatches">
-            <button type="submit" class="btn btn-primary" type="button"
-                (click)="play(match)">{{match}}</button>
+            <button type="submit" class="btn btn-primary" type="button" (click)="play(match)">{{match}}</button>
         </div>
     </div>
 </div>
