@@ -16,7 +16,7 @@ export class LoginComponent implements OnInit {
   registerResponse: User = { nickname: "", password:"" }
   badCredentials: boolean = false;
   registredok: boolean = false;
-  badRegiser: boolean = false;
+  badRegister: boolean = false;
   returnUrl: string = '';
   constructor(
     private service: LoginService,
