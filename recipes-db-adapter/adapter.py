@@ -113,10 +113,11 @@ def add_recipe():
 def delete_recipe():
     print("DELETE received: /recipe")
     req_data = request.args.get('name')
-    coll = list(collection.find({}, {"_id": 0, "name" : req_data}))
+    coll = list(collection.find({"name": req_data}, {"_id": 0}))
+    print(coll)
     if len(coll) > 0:
         collection.delete_one({ "name" : req_data})
-        response = make_response({'recipe': req_data['name']})
+        response = make_response({'recipe': req_data})
         response.headers['Content-Type'] = 'application/json'
         response.status_code = 200
         return response
