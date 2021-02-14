@@ -167,6 +167,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
   sendAnswer(){
     if(this.answerToSend.answer.length > 0){
+      this.answerToSend.userid = this.usernick
       let element = document.getElementById("sendButton") as HTMLElement;
       element.setAttribute('disabled', 'true');
       console.log("Sending this answer: ", this.answerToSend)

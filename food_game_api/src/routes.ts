@@ -21,7 +21,7 @@ const router = express.Router();
  * authentication.
  */
 router.get('/', welcome); 
-router.post('/play', play)
+router.post('/play',logger, play)
 router.get('/game', logger, getMatchstatus)
 router.post('/game', logger, processUserInput)
 router.post('/game/join', logger, opponentJoin)

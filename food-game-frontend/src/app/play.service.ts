@@ -14,34 +14,36 @@ export class PlayService {
 
   httpOptions = {
     headers: new HttpHeaders({
-      'Content-Type':  'application/json',
+      'Content-Type': 'application/json',
     })
   };
 
   constructor(private http: HttpClient) { }
 
-  getMatchesType(): Observable<Array<string>>{
+  getMatchesType(): Observable<Array<string>> {
     return this.http.get<Array<string>>(environment.apiMatchTypes)
   }
 
-  initGame(gamemode:string, matchType:string): Observable<GameMatch> {
+  initGame(gamemode: string, matchType: string): Observable<GameMatch> {
+    let user: User = JSON.parse(sessionStorage.getItem('user') || '{}')
     let gamesettings = {
       'gamemode': gamemode,
-      'matchtype': matchType
+      'matchtype': matchType,
+      'userid': user.nickname
     }
     return this.http.post<GameMatch>(environment.apiPlay, gamesettings, this.httpOptions)
-    .pipe(
-      catchError(this.handleError),
-      map((game:GameMatch) => {
-        if(game.gameid){
+      .pipe(
+        catchError(this.handleError),
+        map((game: GameMatch) => {
+          if (game.gameid) {
+            return game;
+          }
           return game;
         }
-        return game;
-      }
-    ))
+        ))
   }
 
-  joinGame(gameid:string): Observable<GameMatch> {
+  joinGame(gameid: string): Observable<GameMatch> {
     let user: User = JSON.parse(sessionStorage.getItem('user') || '{}')
     let gamesettings = {
       'gameid': gameid,
@@ -49,14 +51,14 @@ export class PlayService {
     }
 
     return this.http.post<GameMatch>(environment.apiJoin, gamesettings, this.httpOptions)
-    .pipe(
-      catchError(this.handleError.bind(this)),
-      map((game:GameMatch) => {
-        if(game.gameid){
+      .pipe(
+        catchError(this.handleError.bind(this)),
+        map((game: GameMatch) => {
+          if (game.gameid) {
+            return game;
+          }
           return game;
-        }
-        return game;
-      }))
+        }))
   }
 
   private handleError(error: HttpErrorResponse) {
