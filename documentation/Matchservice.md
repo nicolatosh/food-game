@@ -22,7 +22,7 @@ Then in both match types a correct answer must be produced. In this way the serv
 
 ###### Match type
 
-```java
+```
 Below there are private fields of the Match object:
 
 	private final String id;
@@ -51,7 +51,7 @@ Following routes base URL is **http://localhost/8080**
 >
 > > *GET /match?type=select_ingredients*
 >
-> ```javascript
+> ```
 >GET 200 Produces: 
 > {
 >     "id":"-349539266",
@@ -76,7 +76,7 @@ Following routes base URL is **http://localhost/8080**
 > }
 > ```
 > 
-> ```javascript
+> ```
 >GET 400 Error:
 > "Error, such type of match does not exits"
 > ```

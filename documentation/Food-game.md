@@ -34,7 +34,7 @@ The typical request flow to play the game is the following:
 
 ###### Types
 
-```javascript
+```
 export interface Match {
   id: string;
   match_type: string;
@@ -64,7 +64,7 @@ Following routes base URL is **http://localhost/30000**
 
 > Endpoint to check if the service is on-line. Just returns "Hello World" message.
 >
-> ```javascript
+> ```
 >GET 200 Produces: 
 > "Food-game online!"
 >```
@@ -80,7 +80,7 @@ Following routes base URL is **http://localhost/30000**
 >
 > > gamemode can be: "single" or "multiplayer"
 >
-> ```javascript
+> ```
 > Requires: 
 > {
 >     "gamemode": "single",
@@ -116,7 +116,7 @@ Following routes base URL is **http://localhost/30000**
 > }
 > ```
 >
-> ```javascript
+> ```
 > POST 400 Errors:
 > { 'error': 'Cannot start game with chosen settings' }
 > { 'error': 'not authorized' }
@@ -132,7 +132,7 @@ Following routes base URL is **http://localhost/30000**
 >
 > > *GET /game?gameid=1312&userid=userid*
 >
-> ```javascript
+> ```
 > Requires: gameid parameter and userid
 > 
 > GET 200 Produces: 
@@ -163,7 +163,7 @@ Following routes base URL is **http://localhost/30000**
 > }
 > ```
 >
-> ```javascript
+> ```
 > GET 404 Errors:
 > {"error":"Game does not exits!"}
 > GET 400 Errors:
@@ -196,7 +196,7 @@ Following routes base URL is **http://localhost/30000**
 > >
 > > 9. Both_user_failure
 >
-> ```javascript
+> ```
 > Requires:
 > {
 >     "gameid":"id",
@@ -215,7 +215,7 @@ Following routes base URL is **http://localhost/30000**
 > Otherwise some messages can be sent.
 > ```
 >
-> ```javascript
+> ```
 > POST 404 Error:
 > {"error":"Game does not exits!"}
 > GET 400 Errors:
@@ -232,7 +232,7 @@ Following routes base URL is **http://localhost/30000**
 >
 > > If user can join the game, an event is sent via SSE. 
 >
-> ```javascript
+> ```
 > Requires: 
 > {
 >     "gameid": "id",
@@ -267,7 +267,7 @@ Following routes base URL is **http://localhost/30000**
 > }
 > ```
 >
-> ```javascript
+> ```
 > POST 404 Errors:
 > { "error": 'Game does not exits!'}
 > { "error": 'game is not joinable'}
@@ -285,7 +285,7 @@ Following routes base URL is **http://localhost/30000**
 >
 > > Note that the sign-in requires this service to call the user-adapter service. Stored password is hashed + salted.
 >
-> ```javascript
+> ```
 >Requires: 
 > {
 >     "nickname": "jason",
@@ -296,7 +296,7 @@ Following routes base URL is **http://localhost/30000**
 > {"nickname":"jason"}
 > ```
 > 
-> ```javascript
+> ```
 >POST 400 Errors:
 > { 'error': 'Supplied bad credentials to perform a signin' }
 > ```
@@ -313,7 +313,7 @@ Following routes base URL is **http://localhost/30000**
 >
 > - If login is successful then user is also authorized. Service simply register a true bit in user database that means that user has correctly logged in
 >
-> ```javascript
+> ```
 >Requires: 
 > {
 >     "nickname": "jason",
@@ -325,7 +325,7 @@ Following routes base URL is **http://localhost/30000**
 > {"nickname":"jason"}
 > ```
 > 
-> ```javascript
+> ```
 >POST 400 Errors:
 > { 'error': "wrong credentials"}
 > { 'error': "authorization failure"}
@@ -339,7 +339,7 @@ Following routes base URL is **http://localhost/30000**
 
 > Endpoint to get all match types supported by the game
 >
-> ```javascript
+> ```
 >GET 200 Produces: 
 > ["rearrange_steps","select_ingredients"]
 > ```
@@ -351,7 +351,7 @@ Following routes base URL is **http://localhost/30000**
 
 > Endpoint to establish a one-way channel between service and caller. Through this channel this service can communicate dynamic updates of game resource. For example if a game ends or expires food-game service will notify with an event though this channel.
 >
-> ```javascript
+> ```
 >GET 200 Produces: 
 > 'Content-type': 'text/event-stream',
 > 'Cache-Control': 'no-cache',

@@ -70,7 +70,7 @@ Following routes base URL is **http://localhost/5000**
 
 > This route can be used to check if the adapter service is working properly.
 >
->  ```javascript
+>  ```
 >Returns JSON: 
 > 
 > {"Connection": "Adapter and  Mongodb are Online!, "Mongo status": ...}
@@ -82,7 +82,7 @@ Following routes base URL is **http://localhost/5000**
 
 > Post a single recipe in Json format
 >
-> ```javascript
+> ```
 >POST 200
 > Requires JSON body:
 > {
@@ -96,7 +96,7 @@ Following routes base URL is **http://localhost/5000**
 > {'recipe': 'Risotto ai funghi'}
 > ```
 > 
-> ```javascript
+> ```
 >POST 400 Errors:
 > {'error': 'supplied not valid recipe'}
 > ```
@@ -109,14 +109,14 @@ Following routes base URL is **http://localhost/5000**
 >
 > > /recipe?name=pasta
 >
-> ```javascript
+> ```
 > DELETE 200
 > Requires: name parameter
 > Produces:
 > {'recipe': 'pasta'}
 > ```
 >
-> ```javascript
+> ```
 > DELETE 400 Errors:
 > {'error': 'supplied not valid recipe'}
 > ```
@@ -127,7 +127,7 @@ Following routes base URL is **http://localhost/5000**
 
 >Endpoint to get all recipes.
 >
->```javascript
+>```
 >GET 200
 >Produces: 
 >
@@ -155,7 +155,7 @@ Following routes base URL is **http://localhost/5000**
 >    ]
 >    ```
 > 
->```javascript
+>```
 >GET 404 Errors:
 >{'error': 'empty recipes collection'}
 >```
@@ -166,7 +166,7 @@ Following routes base URL is **http://localhost/5000**
 
 >Endpoint to get all distinct ingredients.
 >
->```javascript
+>```
 >GET 200
 >Produces: 
 >[
@@ -187,7 +187,7 @@ Following routes base URL is **http://localhost/5000**
 >    ]
 >    ```
 >
->```javascript
+>```
 >GET 404 Errors:
 >{'error': 'empty ingredients collection'}
 >```
